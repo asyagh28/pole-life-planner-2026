@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>🌸 Pole Life Planner 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,sans-serif;background:#fdf4ff;min-height:100vh;}
+input,textarea,button,select{font-family:inherit;}
+input[type=range]{width:100%;accent-color:#f472b6;}
+input[type=checkbox]{accent-color:#f472b6;width:16px;height:16px;}
+textarea{resize:vertical;}
+button{cursor:pointer;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:#f472b6;border-radius:4px;}
+.grad{background:linear-gradient(135deg,#f472b6,#a855f7);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ── DATA ────────────────────────────────────────────────────────────
+const PINK="#f472b6",VIOLET="#a855f7",WHITE="#fff",GRAY="#6b7280";
+const grad="linear-gradient(135deg,#f472b6,#a855f7)";
+const gradS=(a,b)=>`linear-gradient(135deg,${a},${b})`;
+
+const LANGS={it:{flag:"🇮🇹",name:"Italiano"},en:{flag:"🇺🇸",name:"English"},fr:{flag:"🇫🇷",name:"Français"},ar:{flag:"🇦🇪",name:"عربي"},de:{flag:"🇩🇪",name:"Deutsch"},es:{flag:"🇪🇸",name:"Español"},pt:{flag:"🇧🇷",name:"Português"},nl:{flag:"🇳🇱",name:"Nederlands"}};
+
+const MONTHS_L={it:["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"],en:["January","February","March","April","May","June","July","August","September","October","November","December"],fr:["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],ar:["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],de:["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"],es:["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],pt:["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"],nl:["Januari","Februari","Maart","April","Mei","Juni","Juli","Augustus","September","Oktober","November","December"]};
+const DAYS_L={it:["L","M","M","G","V","S","D"],en:["M","T","W","T","F","S","S"],fr:["L","M","M","J","V","S","D"],ar:["ن","ث","أ","خ","ج","س","أ"],de:["M","D","M","D","F","S","S"],es:["L","M","M","J","V","S","D"],pt:["S","T","Q","Q","S","S","D"],nl:["M","D","W","D","V","Z","Z"]};
+const HOLIDAYS={"2026-01-01":"New Year","2026-01-06":"Epifania","2026-04-05":"Easter","2026-04-06":"Easter Monday","2026-04-25":"Liberazione","2026-05-01":"Labour Day","2026-06-02":"Repubblica","2026-08-15":"Ferragosto","2026-11-01":"All Saints","2026-12-08":"Immacolata","2026-12-25":"Christmas","2026-12-26":"Boxing Day"};
+const TRICKS=["Fireman Spin","Back Hook Spin","Front Hook Spin","Pole Sit","Crucifix","Inverted V","Butterfly","Gemini","Jade Split","Ayesha","Deadlift","Iron X","Allegra","Marion Amber","Phoenix","Handspring","Elbow Stand","Superman","Janeiro","Bow & Arrow","Flag","Twisted Grip Handspring","Chopper","Hip Hold","Brass Monkey","Shoulder Mount","Titanic","Ballerina","Caterpillar","Rainbow Marchman"];
+const POLE_FIGS=[{label:"Pole Sit",desc:{it:"Seduta sul palo, gamba agganciata",en:"Seated on the pole, leg hooked",fr:"Assise sur le pole, jambe accrochée",ar:"جالسة على العمود",de:"Sitzend am Pole",es:"Sentada en el pole",pt:"Sentada no pole",nl:"Zittend op de pole"}},{label:"Ayesha",desc:{it:"Corpo invertito verticale, braccia orizzontali",en:"Inverted vertical body, horizontal arms",fr:"Corps inversé, bras horizontaux",ar:"جسم عمودي معكوس",de:"Invertierter Körper vertikal",es:"Cuerpo invertido vertical",pt:"Corpo invertido vertical",nl:"Omgekeerd verticaal lichaam"}},{label:"Gemini",desc:{it:"Invertita con una gamba agganciata",en:"Inverted, one leg hooked, one free",fr:"Inversée, une jambe accrochée",ar:"معكوسة، ساق مربوطة وأخرى حرة",de:"Invertiert, ein Bein eingehakt",es:"Invertida, una pierna enganchada",pt:"Invertida, uma perna presa",nl:"Omgekeerd, één been gehaakt"}},{label:"Jade Split",desc:{it:"Split orizzontale completo in posizione invertita",en:"Full horizontal split while inverted",fr:"Grand écart complet en position inversée",ar:"انشقاق أفقي كامل",de:"Voller Spagat in Inversion",es:"Split horizontal completo invertido",pt:"Split horizontal completo invertido",nl:"Volledige spagaat in inversie"}},{label:"Flag",desc:{it:"Corpo orizzontale, entrambe le braccia tengono il palo",en:"Horizontal body, both arms gripping the pole",fr:"Corps horizontal, les deux bras tiennent le pole",ar:"جسم أفقي، كلتا الذراعين تمسكان العمود",de:"Horizontaler Körper",es:"Cuerpo horizontal",pt:"Corpo horizontal",nl:"Horizontaal lichaam"}},{label:"Butterfly",desc:{it:"Split orizzontale a mezz'aria",en:"Mid-air horizontal split with pole at center",fr:"Grand écart horizontal en l'air",ar:"انشقاق أفقي في الهواء",de:"Horizontaler Spagat in der Luft",es:"Split horizontal en el aire",pt:"Split horizontal no ar",nl:"Horizontale spagaat in de lucht"}}];
+
+const QUOTES={it:["Il tuo corpo può farcela. È la tua mente che devi convincere.","Non aspettare di essere pronta. Inizia e diventa pronta nel processo.","Ogni trick che riesci a fare era impossibile finché non l'hai fatto.","La disciplina è scegliere tra ciò che vuoi ora e ciò che vuoi di più.","Il progresso richiede pazienza. La grandezza richiede costanza.","Non ti confrontare con gli altri. Confrontati con chi eri ieri.","Il dolore di oggi è la forza di domani.","Sii orgogliosa di quanto lontano sei arrivata.","La tua unica limitazione è quella che imponi tu stessa.","Non mollare mai qualcosa che vuoi davvero.","Credi in te anche quando nessun altro lo fa.","Respira. Fidati. Vola."],en:["Your body can do it. It's your mind you need to convince.","Don't wait until you're ready. Start and become ready in the process.","Every trick you can do was impossible until you did it.","Discipline is choosing between what you want now and what you want most.","Progress requires patience. Greatness requires consistency.","Don't compare yourself to others. Compare yourself to who you were yesterday.","Today's pain is tomorrow's strength.","Be proud of how far you've come.","Your only limitation is the one you impose on yourself.","Never give up on something you truly want.","Believe in yourself even when no one else does.","Breathe. Trust. Fly."],fr:["Ton corps peut le faire. C'est ton esprit que tu dois convaincre.","N'attends pas d'être prête. Commence et deviens prête dans le processus.","Chaque figure était impossible jusqu'à ce que tu le fasses.","La discipline c'est choisir entre ce que tu veux maintenant et le plus.","Le progrès demande de la patience. La grandeur demande de la constance.","Ne te compare pas aux autres. Compare-toi à qui tu étais hier.","La douleur d'aujourd'hui est la force de demain.","Sois fière de tout ce que tu as accompli.","Ta seule limite est celle que tu t'imposes.","N'abandonne jamais quelque chose que tu veux vraiment.","Crois en toi même quand personne d'autre ne le fait.","Respire. Fais confiance. Vole."],ar:["جسدك قادر على ذلك. عقلك هو ما تحتاجين إقناعه.","لا تنتظري. ابدئي وستصبحين مستعدة في العملية.","كل حركة تتقنينها كانت مستحيلة حتى فعلتيها.","الانضباط هو الاختيار بين ما تريدينه الآن وما تريدينه أكثر.","التقدم يتطلب الصبر. العظمة تتطلب الثبات.","لا تقارني نفسك. قارني نفسك بمن كنت بالأمس.","ألم اليوم هو قوة الغد.","كوني فخورة بمدى ما وصلت إليه.","قيدك الوحيد هو ما تفرضينه على نفسك.","لا تتخلي أبداً عن شيء تريدينه.","صدّقي في نفسك حتى حين لا يصدّق بك أحد.","تنفسي. ثقي. حلّقي."],de:["Dein Körper kann es. Dein Geist ist es, den du überzeugen musst.","Warte nicht bis du bereit bist. Fang an und werde bereit.","Jeder Trick war unmöglich bis du ihn gemacht hast.","Disziplin heißt wählen zwischen dem was du jetzt und am meisten willst.","Fortschritt braucht Geduld. Größe braucht Beständigkeit.","Vergleiche dich nicht mit anderen. Vergleiche dich mit gestern.","Der Schmerz von heute ist die Kraft von morgen.","Sei stolz wie weit du gekommen bist.","Deine einzige Grenze ist die die du dir selbst auferlegst.","Gib niemals auf was du wirklich willst.","Glaube an dich auch wenn niemand anderes es tut.","Atme. Vertraue. Fliege."],es:["Tu cuerpo puede hacerlo. Es tu mente la que necesitas convencer.","No esperes. Empieza y conviértete en lista en el proceso.","Cada truco era imposible hasta que lo hiciste.","La disciplina es elegir entre lo que quieres ahora y lo que más quieres.","El progreso requiere paciencia. La grandeza requiere constancia.","No te compares. Compárate con quien eras ayer.","El dolor de hoy es la fuerza de mañana.","Sé orgullosa de lo lejos que has llegado.","Tu única limitación es la que te impones.","Nunca renuncies a algo que realmente quieres.","Cree en ti misma incluso cuando nadie más lo hace.","Respira. Confía. Vuela."],pt:["Seu corpo consegue. É sua mente que você precisa convencer.","Não espere estar pronta. Comece e torne-se pronta no processo.","Todo truque era impossível até que você o fez.","Disciplina é escolher entre o que quer agora e o que quer mais.","O progresso requer paciência. A grandeza requer consistência.","Não se compare. Compare-se com quem você era ontem.","A dor de hoje é a força de amanhã.","Seja orgulhosa de o quanto chegou.","Sua única limitação é a que você impõe a si mesma.","Nunca desista de algo que realmente quer.","Acredite em você mesmo quando ninguém mais acredita.","Respire. Confie. Voe."],nl:["Jouw lichaam kan het. Het is je geest die je moet overtuigen.","Wacht niet. Begin en word klaar in het proces.","Elke trick was onmogelijk totdat je het deed.","Discipline is kiezen tussen wat je nu en het meest wilt.","Vooruitgang vraagt geduld. Grootsheid vraagt consistentie.","Vergelijk jezelf niet. Vergelijk jezelf met gisteren.","De pijn van vandaag is de kracht van morgen.","Wees trots op hoe ver je gekomen bent.","Je enige beperking is degene die je jezelf oplegt.","Geef nooit op iets dat je echt wilt.","Geloof in jezelf ook als niemand anders dat doet.","Adem. Vertrouw. Vlieg."]};
+
+const DAILY_Q={it:["Qual è una cosa che posso fare oggi per avvicinarmi al mio obiettivo?","Come voglio sentirmi stasera?","Cosa mi impedisce di crescere e cosa posso cambiare?","Chi voglio essere oggi — non cosa, ma chi?","C'è qualcosa che rimando che posso fare oggi?","Cosa mi dà più energia in questo periodo?","Se non avessi paura, cosa farei oggi?","Di cosa sono più orgogliosa?","Sto allenando il corpo o anche la mente?","Come sto trattando me stessa oggi?","Cosa voglio imparare oggi?","Qual è la mia intenzione per le prossime 24 ore?"],en:["What is one thing I can do today to get closer to my goal?","How do I want to feel tonight?","What is blocking my growth and what can I change?","Who do I want to be today — not what, but who?","Is there something I've been putting off?","What gives me the most energy right now?","If I had no fear, what would I do today?","What am I most proud of?","Am I training my body or also my mind?","How am I treating myself today?","What do I want to learn today?","What is my intention for the next 24 hours?"],fr:["Quelle est une chose que je peux faire aujourd'hui pour me rapprocher de mon objectif?","Comment est-ce que je veux me sentir ce soir?","Qu'est-ce qui bloque ma croissance?","Qui est-ce que je veux être aujourd'hui?","Y a-t-il quelque chose que je reporte?","Qu'est-ce qui me donne le plus d'énergie?","Si je n'avais pas peur, que ferais-je?","De quoi suis-je la plus fière?","Est-ce que j'entraîne aussi mon esprit?","Comment est-ce que je me traite?","Que veux-je apprendre aujourd'hui?","Quelle est mon intention pour les prochaines 24h?"],ar:["ما هو شيء واحد يمكنني فعله اليوم للاقتراب من هدفي؟","كيف أريد أن أشعر الليلة؟","ما الذي يعيق نموي؟","من أريد أن أكون اليوم؟","هل هناك شيء أؤجله؟","ما الذي يعطيني أكبر قدر من الطاقة؟","لو لم يكن لديّ خوف، ماذا كنت سأفعل؟","بماذا أفخر أكثر؟","هل أدرب عقلي أيضاً؟","كيف أعامل نفسي؟","ماذا أريد أن أتعلم اليوم؟","ما هي نيتي للـ 24 ساعة القادمة؟"],de:["Was ist eine Sache die ich heute tun kann?","Wie möchte ich mich heute Abend fühlen?","Was blockiert mein Wachstum?","Wer möchte ich heute sein?","Gibt es etwas das ich aufschiebe?","Was gibt mir die meiste Energie?","Was würde ich ohne Angst tun?","Worauf bin ich am stolzesten?","Trainiere ich auch meinen Geist?","Wie behandle ich mich?","Was möchte ich heute lernen?","Was ist meine Absicht für 24 Stunden?"],es:["¿Qué es una cosa que puedo hacer hoy?","¿Cómo quiero sentirme esta noche?","¿Qué está bloqueando mi crecimiento?","¿Quién quiero ser hoy?","¿Hay algo que he estado postergando?","¿Qué me da más energía?","Sin miedo, ¿qué haría hoy?","¿De qué estoy más orgullosa?","¿Entreno también mi mente?","¿Cómo me trato?","¿Qué quiero aprender hoy?","¿Cuál es mi intención para 24h?"],pt:["Qual é uma coisa que posso fazer hoje?","Como quero me sentir esta noite?","O que está bloqueando meu crescimento?","Quem quero ser hoje?","Há algo que tenho adiado?","O que me dá mais energia?","Sem medo, o que faria hoje?","Do que me orgulho mais?","Estou treinando também minha mente?","Como estou me tratando?","O que quero aprender hoje?","Qual é minha intenção para 24h?"],nl:["Wat is één ding dat ik vandaag kan doen?","Hoe wil ik me vanavond voelen?","Wat blokkeert mijn groei?","Wie wil ik vandaag zijn?","Is er iets dat ik heb uitgesteld?","Wat geeft me de meeste energie?","Zonder angst, wat zou ik doen?","Waar ben ik het meest trots op?","Train ik ook mijn geest?","Hoe behandel ik mezelf?","Wat wil ik vandaag leren?","Wat is mijn intentie voor 24u?"]};
+
+const SECTION_LABELS={it:{home:"Home",annual:"Calendario",monthly:"Mensile",daily:"Giornaliero",pole:"Pole Workout",fitness:"Pilates & Stretching",nutrition:"Nutrition",body:"Body Tracker",goals:"Obiettivi",goalquestions:"Domande Obiettivi",mindset:"Mindset",tips:"Consigli Pole",journal:"Journal",stickers:"Sticker Wall"},en:{home:"Home",annual:"Calendar",monthly:"Monthly",daily:"Daily",pole:"Pole Workout",fitness:"Pilates & Stretching",nutrition:"Nutrition",body:"Body Tracker",goals:"Goals",goalquestions:"Goal Questions",mindset:"Mindset",tips:"Pole Tips",journal:"Journal",stickers:"Sticker Wall"},fr:{home:"Accueil",annual:"Calendrier",monthly:"Mensuel",daily:"Quotidien",pole:"Pole Workout",fitness:"Pilates",nutrition:"Nutrition",body:"Suivi Corps",goals:"Objectifs",goalquestions:"Questions",mindset:"Mindset",tips:"Conseils",journal:"Journal",stickers:"Stickers"},ar:{home:"الرئيسية",annual:"التقويم",monthly:"شهري",daily:"يومي",pole:"تمرين العمود",fitness:"بيلاتس",nutrition:"التغذية",body:"متتبع الجسم",goals:"الأهداف",goalquestions:"أسئلة",mindset:"العقلية",tips:"نصائح",journal:"مذكرتي",stickers:"الملصقات"},de:{home:"Home",annual:"Kalender",monthly:"Monatlich",daily:"Täglich",pole:"Pole Workout",fitness:"Pilates",nutrition:"Ernährung",body:"Body Tracker",goals:"Ziele",goalquestions:"Zielfragen",mindset:"Mindset",tips:"Tipps",journal:"Tagebuch",stickers:"Sticker Wall"},es:{home:"Inicio",annual:"Calendario",monthly:"Mensual",daily:"Diario",pole:"Pole Workout",fitness:"Pilates",nutrition:"Nutrición",body:"Body Tracker",goals:"Objetivos",goalquestions:"Preguntas",mindset:"Mentalidad",tips:"Consejos",journal:"Diario",stickers:"Stickers"},pt:{home:"Início",annual:"Calendário",monthly:"Mensal",daily:"Diário",pole:"Pole Workout",fitness:"Pilates",nutrition:"Nutrição",body:"Body Tracker",goals:"Objetivos",goalquestions:"Perguntas",mindset:"Mentalidade",tips:"Dicas",journal:"Diário",stickers:"Stickers"},nl:{home:"Home",annual:"Kalender",monthly:"Maandelijks",daily:"Dagelijks",pole:"Pole Workout",fitness:"Pilates",nutrition:"Voeding",body:"Body Tracker",goals:"Doelen",goalquestions:"Doelvragen",mindset:"Mindset",tips:"Tips",journal:"Dagboek",stickers:"Stickers"}};
+
+const WARMUP_L={it:["Jogging sul posto — 3 min","Jumping jacks — 1 min","Rotazioni spalle — 10/lato","Rotazioni anche — 10/lato","Cat-cow — 10 rip","Hip circles — 10/lato","Shoulder rolls — 10","Wrist circles — 10/lato","Squat bodyweight — 15","Lunge with twist — 8/lato"],en:["Jogging in place — 3 min","Jumping jacks — 1 min","Shoulder rotations — 10/side","Hip rotations — 10/side","Cat-cow — 10 reps","Hip circles — 10/side","Shoulder rolls — 10","Wrist circles — 10/side","Bodyweight squats — 15","Lunge with twist — 8/side"],fr:["Jogging sur place — 3 min","Jumping jacks — 1 min","Rotations épaules — 10/côté","Rotations hanches — 10/côté","Chat-vache — 10","Cercles hanches — 10/côté","Roulements épaules — 10","Cercles poignets — 10/côté","Squats — 15","Fente rotation — 8/côté"],ar:["الركض في المكان — 3 دقائق","القفز — دقيقة","دوران الكتفين — 10","دوران الوركين — 10","حركة القطة — 10","دوران الوركين — 10","لف الكتفين — 10","دوران المعصمين — 10","قرفصاء — 15","فتحة مع دوران — 8"],de:["Jogging — 3 Min","Jumping Jacks — 1 Min","Schulterrotationen — 10","Hüftrotationen — 10","Katze-Kuh — 10","Hüftkreise — 10","Schulterrollen — 10","Handgelenkkreise — 10","Kniebeugen — 15","Ausfallschritt — 8"],es:["Trote en el lugar — 3 min","Jumping jacks — 1 min","Rotaciones hombros — 10","Rotaciones cadera — 10","Gato-vaca — 10","Círculos cadera — 10","Rollos hombros — 10","Círculos muñecas — 10","Sentadillas — 15","Zancada giro — 8"],pt:["Corrida no lugar — 3 min","Jumping jacks — 1 min","Rotações ombros — 10","Rotações quadril — 10","Gato-vaca — 10","Círculos quadril — 10","Rolagem ombros — 10","Círculos pulso — 10","Agachamentos — 15","Avanço torção — 8"],nl:["Joggen — 3 min","Jumping jacks — 1 min","Schouderrotaties — 10","Heuprotaties — 10","Kat-koe — 10","Heupkringen — 10","Schouderrollingen — 10","Polskringen — 10","Kniebuigingen — 15","Uitval met draai — 8"]};
+
+const MORNING_L={it:["Sveglia & no phone 10 min","Acqua + limone","Stretching mattutino 5 min","Respirazione / meditazione","Colazione nutriente","Visualizzazione obiettivi","Skincare mattina"],en:["Wake up & no phone 10 min","Water + lemon","Morning stretching 5 min","Breathing / meditation","Nutritious breakfast","Goal visualization","Morning skincare"],fr:["Réveil & pas de téléphone","Eau + citron","Étirements 5 min","Respiration / méditation","Petit-déjeuner nutritif","Visualisation","Soin du matin"],ar:["الاستيقاظ وعدم الهاتف","ماء + ليمون","تمدد صباحي","تنفس / تأمل","إفطار مغذٍّ","تصور الأهداف","العناية بالبشرة"],de:["Aufwachen & kein Handy","Wasser + Zitrone","Dehnung 5 Min","Atemübungen / Meditation","Frühstück","Zielvisualisierung","Morgenpflege"],es:["Despertar & sin teléfono","Agua + limón","Estiramiento 5 min","Respiración / meditación","Desayuno nutritivo","Visualización","Skincare"],pt:["Acordar sem celular","Água + limão","Alongamento 5 min","Respiração / meditação","Café nutritivo","Visualização","Skincare manhã"],nl:["Wakker & geen telefoon","Water + citroen","Strekking 5 min","Ademhaling / meditatie","Ontbijt","Doelvisualisatie","Ochtend verzorging"]};
+const NIGHT_L={it:["Cena leggera","No schermo 30 min prima","Foam rolling / recovery","Journaling della giornata","Lettura 15 min","Skincare sera","Preparazione domani"],en:["Light dinner","No screens 30 min before","Foam rolling / recovery","Daily journaling","Reading 15 min","Evening skincare","Prepare for tomorrow"],fr:["Dîner léger","Pas d'écran 30 min","Foam rolling","Journal","Lecture 15 min","Soin du soir","Préparation demain"],ar:["عشاء خفيف","بدون شاشة 30 دقيقة","تدحريج رغوي","كتابة اليومية","قراءة 15 دقيقة","العناية بالبشرة","التحضير للغد"],de:["Leichtes Abendessen","Keine Bildschirme 30 Min","Foam Rolling","Journal","Lesen 15 Min","Abendpflege","Vorbereitung morgen"],es:["Cena ligera","Sin pantallas 30 min","Foam rolling","Diario","Lectura 15 min","Skincare noche","Preparación"],pt:["Jantar leve","Sem tela 30 min","Foam rolling","Diário","Leitura 15 min","Skincare noite","Preparação"],nl:["Licht avondeten","Geen schermen 30 min","Foam rolling","Dagboek","Lezen 15 min","Avond verzorging","Voorbereiding"]};
+const HABITS_L={it:["Allenamento","Acqua 2L","Stretching","Sonno 8h","Meditazione"],en:["Workout","Water 2L","Stretching","Sleep 8h","Meditation"],fr:["Entraînement","Eau 2L","Stretching","Sommeil 8h","Méditation"],ar:["تمرين","ماء","تمدد","نوم","تأمل"],de:["Training","Wasser 2L","Stretching","Schlaf 8h","Meditation"],es:["Entrenamiento","Agua 2L","Estiramiento","Sueño 8h","Meditación"],pt:["Treino","Água 2L","Alongamento","Sono 8h","Meditação"],nl:["Training","Water 2L","Stretching","Slaap 8u","Meditatie"]};
+
+const POLE_TIPS={it:[{t:"Riscaldamento obbligatorio",b:"Non saltare mai il riscaldamento! Almeno 10-15 min di cardio leggero + mobilità articolare prima di toccare il palo."},{t:"Grip: naturale vs chalk",b:"Sudi troppo? Usa chalk di magnesio. Hai la pelle secca? Lascia il palmo nudo. Il grip varia con temperatura e umidità."},{t:"Progressione graduale",b:"Impara prima la tecnica, poi aggiungi forza. Un trick eseguito male porta agli infortuni. Rispetta i prerequisiti."},{t:"Recovery è allenamento",b:"I muscoli crescono nel riposo. Pianifica 1-2 giorni di riposo attivo a settimana: foam rolling, bagni Epsom, sonno."},{t:"Pelle & bruises",b:"I lividi sono normali, le abrasioni no. Idrata la pelle ogni sera con olio di jojoba o rosehip oil."},{t:"Simmetria laterale",b:"Allenati sempre su entrambi i lati! La dominanza laterale crea squilibri muscolari."},{t:"Nutrizione per pole",b:"Mangia 2h prima dell'allenamento. Evita cibi grassi che compromettono il grip sulla pelle."},{t:"Video log mensile",b:"Registrati ogni mese per vedere i progressi reali. Il video non mente."},{t:"Palo statico vs rotante",b:"Il palo statico richiede più forza. Impara prima sullo statico, poi passa al rotante."},{t:"Grip training",b:"Allenala con: dead hang, towel pull-up, squeeze ball. Mani più forti = tricks più sicuri."},{t:"Prevenzione infortuni",b:"I più comuni: polso, spalla, ginocchio. Mai allenarsi con dolore acuto."},{t:"Mentalità da atleta",b:"Il pole è uno sport. Programma le sessioni, traccia i progressi, riposa, mangia bene."}],en:[{t:"Warm-up is mandatory",b:"Never skip warm-up! At least 10-15 min of light cardio + joint mobility before touching the pole."},{t:"Grip: natural vs chalk",b:"Sweating too much? Use magnesium chalk. Dry skin? Go bare palm. Grip changes with temperature."},{t:"Gradual progression",b:"Learn technique first, then add strength. A poorly executed trick leads to injuries."},{t:"Recovery is training",b:"Muscles grow at rest. Plan 1-2 active recovery days per week."},{t:"Skin & bruises",b:"Bruises are normal, abrasions are not. Moisturize skin every evening."},{t:"Lateral symmetry",b:"Always train both sides! Lateral dominance creates muscular imbalances."},{t:"Nutrition for pole",b:"Eat 2h before training. Avoid fatty foods that compromise grip."},{t:"Monthly video log",b:"Record yourself every month to see real progress."},{t:"Static vs spinning pole",b:"Static pole requires more strength. Learn on static first."},{t:"Grip training",b:"Train it with: dead hang, towel pull-ups, squeeze ball."},{t:"Injury prevention",b:"Most common: wrist, shoulder, knee. Never train with acute pain."},{t:"Athlete mindset",b:"Pole is a sport. Schedule sessions, track progress, rest, eat well."}],fr:[{t:"Échauffement obligatoire",b:"Ne jamais sauter l'échauffement! Au moins 10-15 min."},{t:"Grip",b:"Trop de transpiration? Chalk de magnésium. Peau sèche? Paume nue."},{t:"Progression graduelle",b:"Technique d'abord, force ensuite. Respectez les prérequis."},{t:"Récupération",b:"Les muscles grandissent au repos. 1-2 jours de récupération active."},{t:"Peau",b:"Les bleus sont normaux. Hydratez chaque soir."},{t:"Symétrie latérale",b:"Entraînez-vous des deux côtés!"},{t:"Nutrition",b:"Mangez 2h avant. Évitez les aliments gras."},{t:"Vidéo mensuelle",b:"Filmez-vous chaque mois."},{t:"Pole fixe vs rotatif",b:"Apprenez sur fixe d'abord."},{t:"Entraînement grip",b:"Dead hang, traction serviette, balle."},{t:"Prévention blessures",b:"Poignet, épaule, genou. Jamais avec douleur aiguë."},{t:"Mentalité",b:"Le pole est un sport."}],ar:[{t:"الإحماء إلزامي",b:"لا تتخطي الإحماء أبداً! 10-15 دقيقة على الأقل."},{t:"القبضة",b:"تعرقين؟ استخدمي تشوك المغنيسيوم. جلد جاف؟ الكف عارية."},{t:"التقدم التدريجي",b:"تعلمي التقنية أولاً ثم أضيفي القوة."},{t:"التعافي تدريب",b:"العضلات تنمو في الراحة."},{t:"الجلد",b:"الكدمات طبيعية. رطّبي جلدك كل مساء."},{t:"التناسق الجانبي",b:"تدربي على كلا الجانبين!"},{t:"التغذية",b:"كلي قبل ساعتين."},{t:"فيديو شهري",b:"صوري نفسك كل شهر."},{t:"العمود الثابت",b:"تعلمي على الثابت أولاً."},{t:"تدريب القبضة",b:"Dead hang وسحب بمنشفة."},{t:"الوقاية",b:"المعصم والكتف والركبة. لا تتدربي مع ألم حاد."},{t:"العقلية",b:"الرقص على العمود رياضة."}],de:[{t:"Aufwärmen Pflicht",b:"Niemals überspringen! Mindestens 10-15 Min."},{t:"Grip",b:"Zu viel Schweiß? Chalk. Trockene Haut? Nackte Handfläche."},{t:"Graduelle Progression",b:"Erst Technik, dann Kraft."},{t:"Erholung ist Training",b:"Muskeln wachsen in der Ruhe."},{t:"Haut",b:"Blutergüsse normal, Schürfwunden nicht."},{t:"Laterale Symmetrie",b:"Immer beide Seiten trainieren!"},{t:"Ernährung",b:"2h vor Training essen."},{t:"Monatliches Video",b:"Sich jeden Monat filmen."},{t:"Statisches Pole",b:"Erst auf statisch lernen."},{t:"Grip-Training",b:"Dead Hang, Handtuch, Quetschball."},{t:"Verletzungsprävention",b:"Handgelenk, Schulter, Knie."},{t:"Athleten-Mentalität",b:"Pole ist ein Sport."}],es:[{t:"Calentamiento obligatorio",b:"¡Nunca lo saltes! Al menos 10-15 min."},{t:"Grip",b:"¿Sudas mucho? Chalk de magnesio. ¿Piel seca? Palma desnuda."},{t:"Progresión gradual",b:"Técnica primero, fuerza después."},{t:"Recuperación",b:"Los músculos crecen en reposo."},{t:"Piel",b:"Los moretones son normales."},{t:"Simetría lateral",b:"¡Entrena siempre ambos lados!"},{t:"Nutrición",b:"Come 2h antes."},{t:"Video mensual",b:"Grábate cada mes."},{t:"Pole estático",b:"Aprende en estático primero."},{t:"Grip training",b:"Dead hang, jalón con toalla."},{t:"Prevención lesiones",b:"Muñeca, hombro, rodilla."},{t:"Mentalidad",b:"El pole es un deporte."}],pt:[{t:"Aquecimento obrigatório",b:"Nunca pule! Pelo menos 10-15 min."},{t:"Grip",b:"Suando muito? Chalk de magnésio. Pele seca? Palma nua."},{t:"Progressão gradual",b:"Técnica primeiro, força depois."},{t:"Recuperação é treino",b:"Músculos crescem no repouso."},{t:"Pele",b:"Hematomas são normais."},{t:"Simetria lateral",b:"Sempre treine dos dois lados!"},{t:"Nutrição",b:"Coma 2h antes."},{t:"Log de vídeo",b:"Grave-se todo mês."},{t:"Pole estático",b:"Aprenda no estático primeiro."},{t:"Treino de grip",b:"Dead hang, remada toalha."},{t:"Prevenção",b:"Pulso, ombro, joelho."},{t:"Mentalidade",b:"Pole é esporte."}],nl:[{t:"Opwarming verplicht",b:"Nooit overslaan! Minstens 10-15 min."},{t:"Grip",b:"Te veel zweet? Chalk. Droge huid? Kale palm."},{t:"Geleidelijke progressie",b:"Eerst techniek, dan kracht."},{t:"Herstel is training",b:"Spieren groeien in rust."},{t:"Huid",b:"Blauwe plekken zijn normaal."},{t:"Laterale symmetrie",b:"Altijd beide kanten trainen!"},{t:"Voeding",b:"2u voor training eten."},{t:"Maandelijkse video",b:"Elke maand filmen."},{t:"Statische pole",b:"Eerst op statisch leren."},{t:"Grip training",b:"Dead hang, handdoek pull-ups."},{t:"Blessurepreventie",b:"Pols, schouder, knie."},{t:"Mindset",b:"Pole is een sport."}]};
+
+const MINDSET_T={it:[{i:"🧠",t:"Visualizzazione",b:"Prima di ogni sessione, chiudi gli occhi 2-3 minuti e visualizza il trick che vuoi eseguire. Immagina ogni dettaglio."},{i:"🔥",t:"Flow state",b:"Il flow si raggiunge quando la sfida supera leggermente le tue capacità. Scegli tricks appena fuori dalla comfort zone."},{i:"🌊",t:"Gestire la paura",b:"La paura è normale. Tecnica: respira 4 sec, espira 6 sec. Agisci con la paura, non contro di essa."},{i:"💬",t:"Self-talk positivo",b:"Sostituisci 'non riuscirò mai' con 'sto ancora imparando'. Il cervello crede a ciò che gli dici."},{i:"🎯",t:"Obiettivi micro",b:"Un obiettivo grande si raggiunge con micro-goals settimanali. Ogni piccolo step conta."},{i:"😤",t:"Resilienza",b:"Cadere fa parte del processo. Ogni volta che riesegui dopo una caduta, alleni la resilienza mentale."},{i:"🌸",t:"Body neutrality",b:"Il pole non è fatto per un tipo di corpo: è fatto per il tuo corpo. Smetti di confrontarti."},{i:"😴",t:"Sonno & performance",b:"Dormire meno di 7 ore riduce la forza del 20%. Il sonno è allenamento."},{i:"🧘",t:"Respirazione",b:"Inspira 4 sec, trattieni 2, espira 6. Abbassa il cortisolo, aumenta la concentrazione."}],en:[{i:"🧠",t:"Visualization",b:"Before each session, close your eyes 2-3 min and visualize the trick. Imagine every detail."},{i:"🔥",t:"Flow state",b:"Flow is reached when the challenge slightly exceeds your abilities. Choose tricks just outside your comfort zone."},{i:"🌊",t:"Managing fear",b:"Fear is normal. Technique: breathe 4 sec, exhale 6 sec. Act with the fear."},{i:"💬",t:"Positive self-talk",b:"Replace 'I'll never get this' with 'I'm still learning'. Your brain believes what you tell it."},{i:"🎯",t:"Micro goals",b:"A big goal is reached through weekly micro-goals. Every small step counts."},{i:"😤",t:"Resilience",b:"Falling is part of the process. Every retry trains mental resilience."},{i:"🌸",t:"Body neutrality",b:"Pole is not made for one body type: it's made for your body. Stop comparing."},{i:"😴",t:"Sleep & performance",b:"Less than 7 hours of sleep reduces strength by 20%. Sleep is training."},{i:"🧘",t:"Breathing",b:"Inhale 4 sec, hold 2, exhale 6. Lowers cortisol, increases concentration."}],fr:[{i:"🧠",t:"Visualisation",b:"Avant chaque séance, fermez les yeux 2-3 min et visualisez la figure."},{i:"🔥",t:"Flow state",b:"Le flow est atteint quand le défi dépasse légèrement vos capacités."},{i:"🌊",t:"Gérer la peur",b:"La peur est normale. Inspirez 4 sec, expirez 6 sec."},{i:"💬",t:"Self-talk positif",b:"Remplacez 'je n'y arriverai jamais' par 'j'apprends encore'."},{i:"🎯",t:"Micro objectifs",b:"Un grand objectif s'atteint avec des micro-objectifs hebdomadaires."},{i:"😤",t:"Résilience",b:"Tomber fait partie du processus."},{i:"🌸",t:"Neutralité corporelle",b:"Le pole est fait pour votre corps. Arrêtez de vous comparer."},{i:"😴",t:"Sommeil",b:"Moins de 7h réduit la force de 20%."},{i:"🧘",t:"Respiration",b:"Inspirez 4 sec, retenez 2, expirez 6."}],ar:[{i:"🧠",t:"التصور",b:"قبل كل جلسة، أغمضي عينيك 2-3 دقائق وتخيلي الحركة."},{i:"🔥",t:"حالة الانسياب",b:"تتحقق عندما يتجاوز التحدي قليلاً قدراتك."},{i:"🌊",t:"إدارة الخوف",b:"الخوف طبيعي. تنفس 4 ثوان، زفير 6 ثوان."},{i:"💬",t:"الحديث الذاتي",b:"استبدلي 'لن أنجح' بـ 'ما زلت أتعلم'."},{i:"🎯",t:"أهداف صغيرة",b:"الهدف الكبير يتحقق من خلال أهداف أسبوعية صغيرة."},{i:"😤",t:"المرونة",b:"السقوط جزء من العملية."},{i:"🌸",t:"حياد الجسم",b:"الرقص على العمود لجسدك أنت. توقفي عن المقارنة."},{i:"😴",t:"النوم",b:"أقل من 7 ساعات يقلل القوة 20٪."},{i:"🧘",t:"التنفس",b:"شهيق 4 ثوان، احتباس 2، زفير 6."}],de:[{i:"🧠",t:"Visualisierung",b:"Schließe vor jeder Session 2-3 Min die Augen und visualisiere den Trick."},{i:"🔥",t:"Flow State",b:"Flow entsteht wenn die Herausforderung deine Fähigkeiten leicht übersteigt."},{i:"🌊",t:"Angst bewältigen",b:"Angst ist normal. 4 Sek einatmen, 6 Sek ausatmen."},{i:"💬",t:"Positives Selbstgespräch",b:"Ersetze 'Das schaffe ich nie' durch 'Ich lerne noch'."},{i:"🎯",t:"Mikroziele",b:"Ein großes Ziel wird durch wöchentliche Mikroziele erreicht."},{i:"😤",t:"Resilienz",b:"Fallen gehört dazu."},{i:"🌸",t:"Körperneutralität",b:"Pole ist für deinen Körper. Hör auf zu vergleichen."},{i:"😴",t:"Schlaf",b:"Weniger als 7h reduziert Kraft um 20%."},{i:"🧘",t:"Atmung",b:"4 Sek einatmen, 2 halten, 6 ausatmen."}],es:[{i:"🧠",t:"Visualización",b:"Antes de cada sesión, cierra los ojos 2-3 min y visualiza el truco."},{i:"🔥",t:"Flow state",b:"El flow se alcanza cuando el desafío supera ligeramente tus capacidades."},{i:"🌊",t:"Gestionar el miedo",b:"El miedo es normal. Respira 4 seg, exhala 6 seg."},{i:"💬",t:"Self-talk positivo",b:"Reemplaza 'nunca lo lograré' por 'todavía estoy aprendiendo'."},{i:"🎯",t:"Micro objetivos",b:"Un gran objetivo se alcanza con micro-objetivos semanales."},{i:"😤",t:"Resiliencia",b:"Caer es parte del proceso."},{i:"🌸",t:"Neutralidad corporal",b:"El pole está hecho para tu cuerpo. Deja de compararte."},{i:"😴",t:"Sueño",b:"Menos de 7h reduce la fuerza un 20%."},{i:"🧘",t:"Respiración",b:"Inhala 4 seg, retén 2, exhala 6."}],pt:[{i:"🧠",t:"Visualização",b:"Antes de cada sessão, feche os olhos 2-3 min e visualize o truque."},{i:"🔥",t:"Flow state",b:"Flow ocorre quando o desafio supera levemente suas capacidades."},{i:"🌊",t:"Gerenciar o medo",b:"Medo é normal. Respire 4 seg, expire 6 seg."},{i:"💬",t:"Auto-fala positiva",b:"Substitua 'nunca vou conseguir' por 'ainda estou aprendendo'."},{i:"🎯",t:"Micro objetivos",b:"Um grande objetivo é alcançado por micro-objetivos semanais."},{i:"😤",t:"Resiliência",b:"Cair faz parte do processo."},{i:"🌸",t:"Neutralidade corporal",b:"O pole é feito para o seu corpo. Pare de se comparar."},{i:"😴",t:"Sono",b:"Menos de 7h reduz a força em 20%."},{i:"🧘",t:"Respiração",b:"Inspire 4 seg, segure 2, expire 6."}],nl:[{i:"🧠",t:"Visualisatie",b:"Sluit voor elke sessie 2-3 min je ogen en visualiseer de trick."},{i:"🔥",t:"Flow state",b:"Flow ontstaat wanneer de uitdaging je vaardigheden licht overstijgt."},{i:"🌊",t:"Angst beheersen",b:"Angst is normaal. 4 sec inademen, 6 sec uitademen."},{i:"💬",t:"Positieve zelfpraat",b:"Vervang 'dat lukt me nooit' door 'ik ben nog aan het leren'."},{i:"🎯",t:"Micro doelen",b:"Een groot doel wordt bereikt met wekelijkse micro-doelen."},{i:"😤",t:"Veerkracht",b:"Vallen hoort erbij."},{i:"🌸",t:"Lichaamsneutraliteit",b:"Pole is gemaakt voor jouw lichaam. Stop met vergelijken."},{i:"😴",t:"Slaap",b:"Minder dan 7u vermindert kracht met 20%."},{i:"🧘",t:"Ademhaling",b:"4 sec inademen, 2 vasthouden, 6 uitademen."}]};
+
+const GOAL_Q={it:{daily:["Qual è la mia priorità numero 1 di oggi?","Come voglio sentirmi stasera?","Cosa posso fare oggi per avvicinarmi al mio obiettivo mensile?","C'è qualcosa che rimando che posso fare oggi?","Cosa mi dà più energia?","Se non avessi paura, cosa farei?","Di cosa sono più orgogliosa?","Sto allenando il corpo o anche la mente?","Come sto trattando me stessa?","Qual è la mia intenzione per le prossime 24 ore?"],weekly:["Qual è il risultato più importante di questa settimana?","Cosa ha funzionato la settimana scorsa?","Cosa non ha funzionato?","Come curo il mio corpo e la mia mente?","C'è qualcosa che mi spaventa da affrontare?","Quante sessioni pianifico?","Chi mi ha ispirata?","Sto avanzando o girando in cerchio?","Come celebro i miei progressi?","Quale abitudine voglio rafforzare?"],monthly:["Qual è la mia intenzione principale per questo mese?","Quale trick voglio raggiungere entro fine mese?","Come misuro il successo di questo mese?","Quali abitudini voglio costruire o rompere?","Come voglio sentirmi a fine mese?","Cosa voglio imparare di nuovo?","Su cosa devo lavorare di più?","Cosa mi ha bloccata il mese scorso?","Sto investendo abbastanza in me stessa?","Cosa cambierebbe se smettessi di dubitare?"],annual:["Chi voglio essere a dicembre 2026?","Qual è il mio sogno più grande?","In 3 parole: la mia vita ideale?","Quali 3 tricks voglio raggiungere?","Come voglio che il mio corpo si senta?","Qual è la mia parola guida?","Cosa sono disposta a lasciare andare?","Come investo in me stessa?","Qual è la versione di me che mi spaventa?","Cosa voglio che la mia storia dica?"]},en:{daily:["What is my top priority today?","How do I want to feel tonight?","What can I do today to get closer to my monthly goal?","Is there something I've been putting off?","What gives me the most energy?","If I had no fear, what would I do?","What am I most proud of?","Am I training my body or also my mind?","How am I treating myself?","What is my intention for the next 24 hours?"],weekly:["What is the most important result this week?","What worked last week?","What didn't work?","How do I take care of my body and mind?","Is there something scary I want to face?","How many sessions do I plan?","Who inspired me?","Am I moving forward or going in circles?","How do I celebrate my progress?","What habit do I want to strengthen?"],monthly:["What is my main intention for this month?","What trick do I want to reach by end of month?","How do I measure success this month?","What habits do I want to build or break?","How do I want to feel at end of month?","What new thing do I want to learn?","What do I need to work on most?","What blocked me last month?","Am I investing enough in myself?","What would change if I stopped doubting?"],annual:["Who do I want to be in December 2026?","What is my biggest dream?","In 3 words: my ideal life?","What 3 tricks do I want to achieve?","How do I want my body to feel?","What is my guiding word?","What am I willing to let go of?","How do I invest in myself?","What version of me scares me most?","What do I want my story to say?"]},fr:{daily:["Quelle est ma priorité numéro 1 aujourd'hui?","Comment est-ce que je veux me sentir ce soir?","Que puis-je faire aujourd'hui?","Y a-t-il quelque chose que je reporte?","Qu'est-ce qui me donne le plus d'énergie?","Si je n'avais pas peur, que ferais-je?","De quoi suis-je la plus fière?","Est-ce que j'entraîne aussi mon esprit?","Comment est-ce que je me traite?","Quelle est mon intention pour les prochaines 24h?"],weekly:["Quel est le résultat le plus important cette semaine?","Qu'est-ce qui a fonctionné?","Qu'est-ce qui n'a pas fonctionné?","Comment est-ce que je prends soin de moi?","Y a-t-il quelque chose de difficile?","Combien de séances est-ce que je planifie?","Qui m'a inspirée?","Est-ce que j'avance?","Comment est-ce que je célèbre mes progrès?","Quelle habitude est-ce que je veux renforcer?"],monthly:["Quelle est mon intention principale ce mois?","Quelle figure veux-je maîtriser?","Comment est-ce que je mesure le succès?","Quelles habitudes créer ou casser?","Comment est-ce que je veux me sentir en fin de mois?","Qu'est-ce que je veux apprendre?","Sur quoi dois-je travailler?","Qu'est-ce qui m'a bloquée?","Est-ce que j'investis assez en moi?","Que changerait si j'arrêtais de douter?"],annual:["Qui est-ce que je veux être en décembre 2026?","Quel est mon plus grand rêve?","En 3 mots: ma vie idéale?","Quelles 3 figures veux-je maîtriser?","Comment est-ce que je veux me sentir?","Quel est mon mot guide?","À quoi suis-je prête à renoncer?","Comment est-ce que j'investis en moi?","Quelle version de moi me fait peur?","Que veux-je que mon histoire dise?"]},ar:{daily:["ما هي أولويتي الأولى اليوم؟","كيف أريد أن أشعر الليلة؟","ما الذي يمكنني فعله اليوم؟","هل هناك شيء أؤجله؟","ما الذي يعطيني أكبر قدر من الطاقة؟","لو لم يكن لديّ خوف؟","بماذا أفخر أكثر؟","هل أدرب عقلي أيضاً؟","كيف أعامل نفسي؟","ما هي نيتي للـ 24 ساعة القادمة؟"],weekly:["ما هو أهم نتيجة هذا الأسبوع؟","ما الذي نجح؟","ما الذي لم ينجح؟","كيف أعتني بنفسي؟","هل هناك شيء مخيف؟","كم جلسة أخطط؟","من ألهمني؟","هل أتقدم؟","كيف أحتفل؟","ما هي العادة التي أريد تعزيزها؟"],monthly:["ما هي نيتي الرئيسية هذا الشهر؟","ما الحركة التي أريد تحقيقها؟","كيف أقيس النجاح؟","ما العادات؟","كيف أريد أن أشعر؟","ما الجديد الذي أريد تعلمه؟","على ماذا أعمل؟","ما الذي أوقفني؟","هل أستثمر في نفسي؟","ماذا سيتغير لو توقفت عن الشك؟"],annual:["من أريد أن أكون في ديسمبر 2026؟","ما هو حلمي الأكبر؟","في 3 كلمات؟","ما الحركات الـ 3؟","كيف أريد جسدي؟","ما كلمتي التوجيهية؟","ما الذي أتركه؟","كيف أستثمر في نفسي؟","أي نسخة مني تخيفني؟","ماذا تقول قصتي؟"]},de:{daily:["Was ist meine Priorität heute?","Wie möchte ich mich heute Abend fühlen?","Was kann ich heute tun?","Gibt es etwas das ich aufschiebe?","Was gibt mir die meiste Energie?","Was würde ich ohne Angst tun?","Worauf bin ich am stolzesten?","Trainiere ich auch meinen Geist?","Wie behandle ich mich?","Was ist meine Absicht für 24h?"],weekly:["Was ist das wichtigste Ergebnis?","Was hat funktioniert?","Was hat nicht funktioniert?","Wie pflege ich mich?","Gibt es etwas Schwieriges?","Wie viele Sessions plane ich?","Wer hat mich inspiriert?","Komme ich voran?","Wie feiere ich Fortschritte?","Welche Gewohnheit stärken?"],monthly:["Was ist meine Hauptabsicht?","Welchen Trick will ich erreichen?","Wie messe ich Erfolg?","Welche Gewohnheiten?","Wie will ich mich fühlen?","Was Neues lernen?","Woran arbeiten?","Was hat mich blockiert?","Investiere ich genug?","Was würde sich ändern?"],annual:["Wer will ich im Dezember 2026 sein?","Was ist mein größter Traum?","In 3 Worten?","Welche 3 Tricks?","Wie soll sich mein Körper anfühlen?","Was ist mein Leitwort?","Was loslassen?","Wie investiere ich?","Welche Version erschreckt mich?","Was soll meine Geschichte sagen?"]},es:{daily:["¿Cuál es mi prioridad hoy?","¿Cómo quiero sentirme esta noche?","¿Qué puedo hacer hoy?","¿Hay algo que he postergado?","¿Qué me da más energía?","Sin miedo, ¿qué haría?","¿De qué estoy más orgullosa?","¿Entreno también mi mente?","¿Cómo me trato?","¿Cuál es mi intención para 24h?"],weekly:["¿Cuál es el resultado más importante?","¿Qué funcionó?","¿Qué no funcionó?","¿Cómo me cuido?","¿Algo difícil que enfrentar?","¿Cuántas sesiones planeo?","¿Quién me inspiró?","¿Estoy avanzando?","¿Cómo celebro?","¿Qué hábito reforzar?"],monthly:["¿Cuál es mi intención principal?","¿Qué truco lograr?","¿Cómo mido el éxito?","¿Qué hábitos?","¿Cómo quiero sentirme?","¿Qué nuevo aprender?","¿En qué trabajar?","¿Qué me bloqueó?","¿Invierto en mí?","¿Qué cambiaría?"],annual:["¿Quién quiero ser en diciembre 2026?","¿Cuál es mi sueño más grande?","¿En 3 palabras?","¿Qué 3 trucos?","¿Cómo mi cuerpo?","¿Mi palabra guía?","¿A qué renuncio?","¿Cómo invierto?","¿Qué versión me asusta?","¿Qué dice mi historia?"]},pt:{daily:["Qual é minha prioridade hoje?","Como quero me sentir esta noite?","O que posso fazer hoje?","Há algo que tenho adiado?","O que me dá mais energia?","Sem medo, o que faria?","Do que me orgulho mais?","Estou treinando também minha mente?","Como estou me tratando?","Qual é minha intenção para 24h?"],weekly:["Qual é o resultado mais importante?","O que funcionou?","O que não funcionou?","Como me cuido?","Algo difícil para enfrentar?","Quantas sessões planejo?","Quem me inspirou?","Estou avançando?","Como celebro?","Que hábito fortalecer?"],monthly:["Qual é minha intenção principal?","Que truque alcançar?","Como medir o sucesso?","Que hábitos?","Como quero me sentir?","O que aprender?","Em que trabalhar?","O que me bloqueou?","Estou investindo em mim?","O que mudaria?"],annual:["Quem quero ser em dezembro 2026?","Qual é meu maior sonho?","Em 3 palavras?","Que 3 truques?","Como meu corpo?","Minha palavra guia?","A que abrir mão?","Como invisto?","Qual versão me assusta?","O que minha história diz?"]},nl:{daily:["Wat is mijn prioriteit vandaag?","Hoe wil ik me vanavond voelen?","Wat kan ik vandaag doen?","Is er iets dat ik heb uitgesteld?","Wat geeft me de meeste energie?","Zonder angst, wat zou ik doen?","Waar ben ik het meest trots op?","Train ik ook mijn geest?","Hoe behandel ik mezelf?","Wat is mijn intentie voor 24u?"],weekly:["Wat is het belangrijkste resultaat?","Wat werkte?","Wat werkte niet?","Hoe zorg ik voor mezelf?","Iets moeilijks aanpakken?","Hoeveel sessies plan ik?","Wie inspireerde me?","Beweeg ik vooruit?","Hoe vier ik?","Welke gewoonte versterken?"],monthly:["Wat is mijn hoofdintentie?","Welke trick bereiken?","Hoe meet ik succes?","Welke gewoontes?","Hoe wil ik me voelen?","Wat leren?","Waaraan werken?","Wat blokkeerde me?","Investeer ik genoeg?","Wat zou veranderen?"],annual:["Wie wil ik zijn in december 2026?","Wat is mijn grootste droom?","In 3 woorden?","Welke 3 tricks?","Hoe mijn lichaam?","Mijn richtinggevend woord?","Waarvan loslaten?","Hoe investeer ik?","Welke versie maakt me bangst?","Wat zegt mijn verhaal?"]}};
+
+const JOURNAL_P={it:["Qual è il trick che mi spaventa di più e perché?","Come è cambiato il mio rapporto con il mio corpo?","Cosa mi ha dato più soddisfazione questa settimana?","Se potessi dirmi qualcosa di me stessa un anno fa?","Come gestisco la paura prima di un trick difficile?","Cosa significa per me il pole dance?"],en:["What trick scares me most and why?","How has my relationship with my body changed?","What gave me the most satisfaction this week?","If I could tell my past self something?","How do I handle fear before a difficult trick?","What does pole dance mean to me?"],fr:["Quelle figure me fait le plus peur?","Comment mon rapport au corps a changé?","Qu'est-ce qui m'a donné le plus de satisfaction?","Si je pouvais dire quelque chose à moi d'avant?","Comment je gère la peur?","Que signifie le pole pour moi?"],ar:["ما الحركة التي تخيفني أكثر؟","كيف تغيرت علاقتي بجسدي؟","ما الذي أعطاني أكبر قدر من الرضا؟","ماذا كنت سأقول لنفسي قبل عام؟","كيف أتعامل مع الخوف؟","ماذا يعني لي الرقص على العمود؟"],de:["Welcher Trick macht mir am meisten Angst?","Wie hat sich mein Verhältnis zum Körper verändert?","Was hat mir die meiste Befriedigung gegeben?","Was würde ich mir früher sagen?","Wie gehe ich mit Angst um?","Was bedeutet Pole Dance für mich?"],es:["¿Qué truco me da más miedo?","¿Cómo ha cambiado mi relación con mi cuerpo?","¿Qué me ha dado más satisfacción?","¿Qué le diría a mí misma de antes?","¿Cómo manejo el miedo?","¿Qué significa el pole para mí?"],pt:["Qual truque me assusta mais?","Como mudou minha relação com meu corpo?","O que me deu mais satisfação?","O que eu diria para mim mesma antes?","Como lido com o medo?","O que o pole significa para mim?"],nl:["Welke trick maakt me het bangst?","Hoe is mijn relatie met mijn lichaam veranderd?","Wat gaf me de meeste voldoening?","Wat zou ik mijn vroegere zelf zeggen?","Hoe ga ik om met angst?","Wat betekent pole voor mij?"]};
+
+const STICKERS=[{e:"🔥",l:"On fire"},{e:"💫",l:"Progress"},{e:"🌸",l:"Growth"},{e:"⭐",l:"Star"},{e:"💪",l:"Strong"},{e:"🎯",l:"Goal hit"},{e:"🦋",l:"Transform"},{e:"🌈",l:"Victory"},{e:"👑",l:"Queen"},{e:"🏆",l:"Champion"},{e:"💎",l:"Precious"},{e:"🌙",l:"Night"},{e:"✨",l:"Magic"},{e:"🦄",l:"Unique"},{e:"🎀",l:"Girly"},{e:"🌺",l:"Bloom"},{e:"💝",l:"Love"},{e:"🚀",l:"Launch"},{e:"🌊",l:"Flow"},{e:"🎪",l:"Show"},{e:"🧨",l:"Boom"},{e:"🦅",l:"Fly"},{e:"🌟",l:"Superstar"},{e:"🍀",l:"Lucky"}];
+
+const TX={appSub:{it:"Il tuo planner da pole dancer",en:"Your pole dancer planner",fr:"Votre agenda de pole dance",ar:"مخططك لراقصة العمود",de:"Dein Pole Dance Planer",es:"Tu planificador de pole dance",pt:"Seu planner de pole dance",nl:"Jouw pole dance planner"},anotherQuote:{it:"Altra citazione ↺",en:"Another quote ↺",fr:"Autre citation ↺",ar:"اقتباس آخر ↺",de:"Anderes Zitat ↺",es:"Otra cita ↺",pt:"Outra citação ↺",nl:"Ander citaat ↺"},poleFigures:{it:"Figure di Pole Dance 💫",en:"Pole Dance Figures 💫",fr:"Figures de Pole Dance 💫",ar:"حركات العمود 💫",de:"Pole Dance Figuren 💫",es:"Figuras de Pole Dance 💫",pt:"Figuras de Pole Dance 💫",nl:"Pole Dance Figuren 💫"},howToUse:{it:"Come usare il planner",en:"How to use the planner",fr:"Comment utiliser",ar:"كيفية الاستخدام",de:"So nutzt du den Planer",es:"Cómo usar el planner",pt:"Como usar o planner",nl:"Hoe te gebruiken"},dailyTitle:{it:"Giornaliero ☀️",en:"Daily ☀️",fr:"Quotidien ☀️",ar:"يومي ☀️",de:"Täglich ☀️",es:"Diario ☀️",pt:"Diário ☀️",nl:"Dagelijks ☀️"},questionOfDay:{it:"DOMANDA DEL GIORNO",en:"QUESTION OF THE DAY",fr:"QUESTION DU JOUR",ar:"سؤال اليوم",de:"FRAGE DES TAGES",es:"PREGUNTA DEL DÍA",pt:"PERGUNTA DO DIA",nl:"VRAAG VAN DE DAG"},myAnswer:{it:"💭 La mia risposta",en:"💭 My answer",fr:"💭 Ma réponse",ar:"💭 إجابتي",de:"💭 Meine Antwort",es:"💭 Mi respuesta",pt:"💭 Minha resposta",nl:"💭 Mijn antwoord"},mood:{it:"Umore del giorno",en:"Mood of the day",fr:"Humeur du jour",ar:"مزاج اليوم",de:"Stimmung",es:"Estado de ánimo",pt:"Humor do dia",nl:"Stemming"},morning:{it:"🌅 Morning Routine",en:"🌅 Morning Routine",fr:"🌅 Routine Matinale",ar:"🌅 روتين الصباح",de:"🌅 Morgenroutine",es:"🌅 Rutina Matutina",pt:"🌅 Rotina Matinal",nl:"🌅 Ochtendroutine"},intention:{it:"🎯 Intenzione del giorno",en:"🎯 Intention of the day",fr:"🎯 Intention du jour",ar:"🎯 نية اليوم",de:"🎯 Tagesabsicht",es:"🎯 Intención del día",pt:"🎯 Intenção do dia",nl:"🎯 Dagintentie"},top3:{it:"🏆 Top 3 priorità",en:"🏆 Top 3 priorities",fr:"🏆 Top 3 priorités",ar:"🏆 أهم 3 أولويات",de:"🏆 Top 3 Prioritäten",es:"🏆 Top 3 prioridades",pt:"🏆 Top 3 prioridades",nl:"🏆 Top 3 prioriteiten"},todo:{it:"✅ To-Do List",en:"✅ To-Do List",fr:"✅ Liste de tâches",ar:"✅ قائمة المهام",de:"✅ Aufgabenliste",es:"✅ Lista de tareas",pt:"✅ Lista de tarefas",nl:"✅ Takenlijst"},energy:{it:"⚡ Energia & Idratazione",en:"⚡ Energy & Hydration",fr:"⚡ Énergie & Hydratation",ar:"⚡ الطاقة والترطيب",de:"⚡ Energie & Hydration",es:"⚡ Energía & Hidratación",pt:"⚡ Energia & Hidratação",nl:"⚡ Energie & Hydratatie"},energyLevel:{it:"Livello energia",en:"Energy level",fr:"Niveau énergie",ar:"مستوى الطاقة",de:"Energieniveau",es:"Nivel de energía",pt:"Nível de energia",nl:"Energieniveau"},glasses:{it:"Bicchieri d'acqua",en:"Glasses of water",fr:"Verres d'eau",ar:"أكواب الماء",de:"Gläser Wasser",es:"Vasos de agua",pt:"Copos de água",nl:"Glazen water"},gratitude:{it:"🙏 Gratitudine",en:"🙏 Gratitude",fr:"🙏 Gratitude",ar:"🙏 الامتنان",de:"🙏 Dankbarkeit",es:"🙏 Gratitud",pt:"🙏 Gratidão",nl:"🙏 Dankbaarheid"},notes:{it:"📝 Note del giorno",en:"📝 Daily notes",fr:"📝 Notes du jour",ar:"📝 ملاحظات",de:"📝 Tagesnotizen",es:"📝 Notas del día",pt:"📝 Notas do dia",nl:"📝 Dagnotities"},win:{it:"🌟 La mia vittoria di oggi",en:"🌟 My win today",fr:"🌟 Ma victoire du jour",ar:"🌟 انتصاري اليوم",de:"🌟 Mein heutiger Sieg",es:"🌟 Mi victoria de hoy",pt:"🌟 Minha vitória",nl:"🌟 Mijn overwinning"},night:{it:"🌙 Night Routine",en:"🌙 Night Routine",fr:"🌙 Routine du Soir",ar:"🌙 روتين المساء",de:"🌙 Abendroutine",es:"🌙 Rutina Nocturna",pt:"🌙 Rotina Noturna",nl:"🌙 Avondroutine"},dayRating:{it:"⭐ Com'è andata?",en:"⭐ How was today?",fr:"⭐ Comment ça s'est passé?",ar:"⭐ كيف كان يومك؟",de:"⭐ Wie war dein Tag?",es:"⭐ ¿Cómo fue tu día?",pt:"⭐ Como foi seu dia?",nl:"⭐ Hoe was je dag?"},trickTracker:{it:"Trick Progress Tracker",en:"Trick Progress Tracker",fr:"Suivi des Figures",ar:"متتبع الحركات",de:"Trick-Tracker",es:"Rastreador de Trucos",pt:"Rastreador de Truques",nl:"Trick Tracker"},sessionLog:{it:"Log sessione di oggi",en:"Today's session log",fr:"Journal de séance",ar:"سجل جلسة اليوم",de:"Trainingsprotokoll",es:"Registro de sesión",pt:"Log da sessão",nl:"Sessie log"},warmupTitle:{it:"Warm-Up (10-15 min)",en:"Warm-Up (10-15 min)",fr:"Échauffement (10-15 min)",ar:"إحماء (10-15 دقيقة)",de:"Aufwärmen (10-15 Min)",es:"Calentamiento (10-15 min)",pt:"Aquecimento (10-15 min)",nl:"Opwarming (10-15 min)"},poleWarmup:{it:"Riscaldamento obbligatorio prima del palo!",en:"Mandatory warm-up before the pole!",fr:"Échauffement obligatoire avant le pole!",ar:"الإحماء إلزامي قبل العمود!",de:"Pflichtaufwärmen vor dem Pole!",es:"¡Calentamiento obligatorio antes del pole!",pt:"Aquecimento obrigatório antes do pole!",nl:"Verplichte opwarming voor de pole!"},goalQTitle:{it:"Domande per gli Obiettivi ❓",en:"Goal Questions ❓",fr:"Questions Objectifs ❓",ar:"أسئلة الأهداف ❓",de:"Zielfragen ❓",es:"Preguntas de Objetivos ❓",pt:"Perguntas de Metas ❓",nl:"Doelvragen ❓"},mindsetTitle:{it:"Mindset & Mente 🧠",en:"Mindset & Mental Training 🧠",fr:"Mindset 🧠",ar:"العقلية 🧠",de:"Mindset 🧠",es:"Mentalidad 🧠",pt:"Mentalidade 🧠",nl:"Mindset 🧠"},affirmations:{it:"Le mie affermazioni",en:"My affirmations",fr:"Mes affirmations",ar:"تأكيداتي",de:"Meine Affirmationen",es:"Mis afirmaciones",pt:"Minhas afirmações",nl:"Mijn affirmaties"},tipsTitle:{it:"Consigli Pole Dance ✨",en:"Pole Dance Tips ✨",fr:"Conseils Pole Dance ✨",ar:"نصائح العمود ✨",de:"Pole Dance Tipps ✨",es:"Consejos Pole Dance ✨",pt:"Dicas de Pole Dance ✨",nl:"Pole Dance Tips ✨"},allTips:{it:"Tutti i consigli",en:"All tips",fr:"Tous les conseils",ar:"جميع النصائح",de:"Alle Tipps",es:"Todos los consejos",pt:"Todas as dicas",nl:"Alle tips"},journalTitle:{it:"Journal & Riflessioni 📝",en:"Journal & Reflections 📝",fr:"Journal 📝",ar:"مذكراتي 📝",de:"Tagebuch 📝",es:"Diario 📝",pt:"Diário 📝",nl:"Dagboek 📝"},myPages:{it:"Le mie pagine",en:"My pages",fr:"Mes pages",ar:"صفحاتي",de:"Meine Seiten",es:"Mis páginas",pt:"Minhas páginas",nl:"Mijn pagina's"},journalPrompts:{it:"Prompt per pole dancer",en:"Prompts for pole dancers",fr:"Idées d'écriture",ar:"أسئلة لراقصة العمود",de:"Schreibimpulse",es:"Preguntas para pole dancers",pt:"Prompts para pole dancers",nl:"Schrijfprompts"},stickerTitle:{it:"Sticker Wall 🌟",en:"Sticker Wall 🌟",fr:"Mur de Stickers 🌟",ar:"جدار الملصقات 🌟",de:"Sticker Wall 🌟",es:"Muro de Stickers 🌟",pt:"Mural de Stickers 🌟",nl:"Sticker Muur 🌟"},chooseSticker:{it:"Scegli il tuo sticker",en:"Choose your sticker",fr:"Choisis ton sticker",ar:"اختاري ملصقك",de:"Wähle deinen Sticker",es:"Elige tu sticker",pt:"Escolha seu sticker",nl:"Kies je sticker"},myWall:{it:"La mia sticker wall",en:"My sticker wall",fr:"Mon mur",ar:"جداري",de:"Meine Sticker Wall",es:"Mi muro",pt:"Meu mural",nl:"Mijn muur"},achievements:{it:"traguardi",en:"milestones",fr:"réussites",ar:"إنجاز",de:"Meilensteine",es:"logros",pt:"conquistas",nl:"mijlpalen"},motivational:{it:"Frasi motivazionali 💬",en:"Motivational quotes 💬",fr:"Citations motivantes 💬",ar:"اقتباسات تحفيزية 💬",de:"Motivationszitate 💬",es:"Frases motivadoras 💬",pt:"Frases motivacionais 💬",nl:"Motiverende citaten 💬"},firstSticker:{it:"Aggiungi il tuo primo sticker!",en:"Add your first sticker!",fr:"Ajoute ton premier sticker!",ar:"أضفي أول ملصق!",de:"Füge deinen ersten Sticker hinzu!",es:"¡Añade tu primer sticker!",pt:"Adicione seu primeiro sticker!",nl:"Voeg je eerste sticker toe!"},clickRemove:{it:"Clicca per rimuovere",en:"Click to remove",fr:"Cliquer pour supprimer",ar:"انقر للإزالة",de:"Klicken zum Entfernen",es:"Clic para eliminar",pt:"Clique para remover",nl:"Klik om te verwijderen"},answerHere:{it:"Scrivi qui la tua risposta...",en:"Write your answer here...",fr:"Écris ta réponse ici...",ar:"اكتبي إجابتك هنا...",de:"Schreibe deine Antwort hier...",es:"Escribe tu respuesta aquí...",pt:"Escreva sua resposta aqui...",nl:"Schrijf hier je antwoord..."},qTabLabels:{it:["Giornaliere","Settimanali","Mensili","Annuali"],en:["Daily","Weekly","Monthly","Annual"],fr:["Quotidiennes","Hebdomadaires","Mensuelles","Annuelles"],ar:["يومية","أسبوعية","شهرية","سنوية"],de:["Täglich","Wöchentlich","Monatlich","Jährlich"],es:["Diarias","Semanales","Mensuales","Anuales"],pt:["Diárias","Semanais","Mensais","Anuais"],nl:["Dagelijks","Wekelijks","Maandelijks","Jaarlijks"]},monthlyGoals:{it:"Obiettivi di",en:"Goals for",fr:"Objectifs de",ar:"أهداف",de:"Ziele für",es:"Objetivos de",pt:"Objetivos de",nl:"Doelen voor"},habitTracker:{it:"Habit Tracker",en:"Habit Tracker",fr:"Suivi des Habitudes",ar:"متتبع العادات",de:"Gewohnheits-Tracker",es:"Rastreador de Hábitos",pt:"Rastreador de Hábitos",nl:"Gewoonten Tracker"},calendarTitle:{it:"Calendario 2026 📅",en:"Calendar 2026 📅",fr:"Calendrier 2026 📅",ar:"تقويم 2026 📅",de:"Kalender 2026 📅",es:"Calendario 2026 📅",pt:"Calendário 2026 📅",nl:"Kalender 2026 📅"},monthlyTitle:{it:"Planner Mensile 🗓",en:"Monthly Planner 🗓",fr:"Planner Mensuel 🗓",ar:"المخطط الشهري 🗓",de:"Monatsplaner 🗓",es:"Planificador Mensual 🗓",pt:"Planner Mensal 🗓",nl:"Maandplanner 🗓"},fitnessTitle:{it:"Pilates & Stretching 🧘",en:"Pilates & Stretching 🧘",fr:"Pilates & Stretching 🧘",ar:"بيلاتس وتمدد 🧘",de:"Pilates & Stretching 🧘",es:"Pilates & Stretching 🧘",pt:"Pilates & Alongamento 🧘",nl:"Pilates & Stretching 🧘"},nutritionTitle:{it:"Nutrition & Meal Plan 🥗",en:"Nutrition & Meal Plan 🥗",fr:"Nutrition 🥗",ar:"التغذية 🥗",de:"Ernährung 🥗",es:"Nutrición 🥗",pt:"Nutrição 🥗",nl:"Voeding 🥗"},bodyTitle:{it:"Body Tracker 💪",en:"Body Tracker 💪",fr:"Suivi Corps 💪",ar:"متتبع الجسم 💪",de:"Body Tracker 💪",es:"Body Tracker 💪",pt:"Body Tracker 💪",nl:"Body Tracker 💪"},goalsTitle:{it:"Obiettivi & Dream Life 🎯",en:"Goals & Dream Life 🎯",fr:"Objectifs & Vie de Rêve 🎯",ar:"الأهداف 🎯",de:"Ziele & Traumleben 🎯",es:"Objetivos & Sueños 🎯",pt:"Objetivos & Sonhos 🎯",nl:"Doelen & Droomleven 🎯"},smartTitle:{it:"Metodo S.M.A.R.T.",en:"S.M.A.R.T. Method",fr:"Méthode S.M.A.R.T.",ar:"طريقة S.M.A.R.T.",de:"S.M.A.R.T. Methode",es:"Método S.M.A.R.T.",pt:"Método S.M.A.R.T.",nl:"S.M.A.R.T. Methode"},goalWord:{it:"La mia parola del 2026",en:"My word for 2026",fr:"Mon mot pour 2026",ar:"كلمتي لعام 2026",de:"Mein Wort für 2026",es:"Mi palabra para 2026",pt:"Minha palavra para 2026",nl:"Mijn woord voor 2026"},annualGoal:{it:"Obiettivo annuale",en:"Annual Goal",fr:"Objectif Annuel",ar:"الهدف السنوي",de:"Jahresziel",es:"Objetivo Anual",pt:"Objetivo Anual",nl:"Jaardoel"},dreamLife:{it:"Dream Life",en:"Dream Life",fr:"Vie de Rêve",ar:"حياة الأحلام",de:"Traumleben",es:"Vida de Sueños",pt:"Vida dos Sonhos",nl:"Droomleven"},preRoutine:{it:"Routine mentale pre-allenamento",en:"Pre-workout mental routine",fr:"Routine mentale pré-entraînement",ar:"الروتين الذهني قبل التدريب",de:"Mentale Routine vor Training",es:"Rutina mental pre-entrenamiento",pt:"Rotina mental pré-treino",nl:"Mentale routine voor training"},wellbeing:{it:"Benessere settimanale",en:"Weekly wellbeing",fr:"Bien-être hebdomadaire",ar:"الرفاهية الأسبوعية",de:"Wöchentliches Wohlbefinden",es:"Bienestar semanal",pt:"Bem-estar semanal",nl:"Wekelijks welzijn"},measurements:{it:"Misure corporee",en:"Body measurements",fr:"Mensurations",ar:"قياسات الجسم",de:"Körpermaße",es:"Medidas corporales",pt:"Medidas corporais",nl:"Lichaamsmetingen"},macros:{it:"Macros consigliati",en:"Recommended macros",fr:"Macros recommandés",ar:"المغذيات الموصى بها",de:"Empfohlene Makros",es:"Macros recomendados",pt:"Macros recomendados",nl:"Aanbevolen macro's"},homeGreeting:{it:"Benvenuta 🌸",en:"Welcome 🌸",fr:"Bienvenue 🌸",ar:"مرحباً 🌸",de:"Willkommen 🌸",es:"Bienvenida 🌸",pt:"Bem-vinda 🌸",nl:"Welkom 🌸"}};
+
+// ── STATE ─────────────────────────────────────────────────────────────
+const state={
+  lang:"en",section:"home",selMonth:new Date().getMonth(),selDay:null,
+  sideOpen:false,showLP:false,
+  tricks:{},daily:{},goals:{annual:"",q1:"",q2:"",q3:"",q4:"",dream:"",word:""},
+  body:{weight:"",bust:"",waist:"",hips:"",thigh:"",notes:""},
+  journal:"",stickWall:[],goalQ:{},
+  gTab:"daily",mindTab:0,tipIdx:0,quoteIdx:0,figIdx:0,
+};
+
+function getState(){ return state; }
+function setState(updates){ Object.assign(state,updates); render(); }
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+const tx=(key)=>TX[key]?.[state.lang]||TX[key]?.en||"";
+const SL=()=>SECTION_LABELS[state.lang]||SECTION_LABELS.en;
+const MONTHS=()=>MONTHS_L[state.lang]||MONTHS_L.en;
+const DAYS_S=()=>DAYS_L[state.lang]||DAYS_L.en;
+const MQ=()=>QUOTES[state.lang]||QUOTES.en;
+const DQ=()=>DAILY_Q[state.lang]||DAILY_Q.en;
+const GQ=()=>GOAL_Q[state.lang]||GOAL_Q.en;
+const MT=()=>MINDSET_T[state.lang]||MINDSET_T.en;
+const PT=()=>POLE_TIPS[state.lang]||POLE_TIPS.en;
+const MORN=()=>MORNING_L[state.lang]||MORNING_L.en;
+const NGHT=()=>NIGHT_L[state.lang]||NIGHT_L.en;
+const QTABS=()=>TX.qTabLabels[state.lang]||TX.qTabLabels.en;
+const WU=()=>WARMUP_L[state.lang]||WARMUP_L.en;
+const JP=()=>JOURNAL_P[state.lang]||JOURNAL_P.en;
+const HL=()=>HABITS_L[state.lang]||HABITS_L.en;
+
+const today=new Date();
+const todayKey=()=>`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+const dayKey=()=>state.selDay||todayKey();
+
+function getDayIndex(dateStr){
+  const[y,m,d]=dateStr.split("-").map(Number);
+  return Math.max(0,Math.floor((new Date(y,m-1,d)-new Date(2026,0,1))/(86400000)));
+}
+function getDaysInMonth(m){
+  const days=[],first=new Date(2026,m,1).getDay(),offset=(first+6)%7,total=new Date(2026,m+1,0).getDate();
+  for(let i=0;i<offset;i++) days.push(null);
+  for(let i=1;i<=total;i++) days.push(i);
+  return days;
+}
+function getHoliday(m,d){
+  return HOLIDAYS[`2026-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`]||null;
+}
+function getDayData(k){ return state.daily[k]||{morning:[],night:[],todo:[],mood:3,gratitude:"",notes:"",energy:5,water:0,qanswer:"",intention:"",priorities:["","",""],win:"",dayrating:0}; }
+function setDayData(k,d){ setState({daily:{...state.daily,[k]:d}}); }
+function setGoalQItem(key,val){ setState({goalQ:{...state.goalQ,[key]:val}}); }
+function addSticker(e){ setState({stickWall:[...state.stickWall,{e,id:Date.now(),x:Math.floor(Math.random()*75)+5,y:Math.floor(Math.random()*75)+5}]}); }
+function removeSticker(id){ setState({stickWall:state.stickWall.filter(s=>s.id!==id)}); }
+
+// Save/load from localStorage
+function saveAll(){
+  try{
+    localStorage.setItem("pld_daily",JSON.stringify(state.daily));
+    localStorage.setItem("pld_tricks",JSON.stringify(state.tricks));
+    localStorage.setItem("pld_goals",JSON.stringify(state.goals));
+    localStorage.setItem("pld_body",JSON.stringify(state.body));
+    localStorage.setItem("pld_journal",JSON.stringify(state.journal));
+    localStorage.setItem("pld_stickers",JSON.stringify(state.stickWall));
+    localStorage.setItem("pld_goalq",JSON.stringify(state.goalQ));
+    localStorage.setItem("pld_lang",state.lang);
+  }catch(e){}
+}
+function loadAll(){
+  try{
+    const d=localStorage.getItem("pld_daily"); if(d) state.daily=JSON.parse(d);
+    const t=localStorage.getItem("pld_tricks"); if(t) state.tricks=JSON.parse(t);
+    const g=localStorage.getItem("pld_goals"); if(g) state.goals=JSON.parse(g);
+    const b=localStorage.getItem("pld_body"); if(b) state.body=JSON.parse(b);
+    const j=localStorage.getItem("pld_journal"); if(j) state.journal=JSON.parse(j);
+    const s=localStorage.getItem("pld_stickers"); if(s) state.stickWall=JSON.parse(s);
+    const q=localStorage.getItem("pld_goalq"); if(q) state.goalQ=JSON.parse(q);
+    const l=localStorage.getItem("pld_lang"); if(l) state.lang=l;
+  }catch(e){}
+}
+
+// ── RENDER HELPERS ────────────────────────────────────────────────────
+const h=(tag,attrs,...children)=>{
+  const el=document.createElement(tag);
+  if(attrs) Object.entries(attrs).forEach(([k,v])=>{
+    if(k==="style"&&typeof v==="object"){Object.assign(el.style,v);}
+    else if(k.startsWith("on")&&typeof v==="function"){el.addEventListener(k.slice(2).toLowerCase(),v);}
+    else if(k==="className"){el.className=v;}
+    else if(k==="checked"&&tag==="input"){el.checked=v;}
+    else if(k==="value"&&(tag==="input"||tag==="textarea")){el.value=v!==undefined?v:"";}
+    else if(k==="type"&&tag==="input"){el.type=v;}
+    else if(k==="placeholder"){el.placeholder=v;}
+    else if(k==="min"||k==="max"||k==="step"){el[k]=v;}
+    else if(k==="rows"){el.rows=v;}
+    else{el.setAttribute(k,v);}
+  });
+  children.flat(Infinity).forEach(c=>{
+    if(c===null||c===undefined||c===false) return;
+    el.appendChild(typeof c==="string"||typeof c==="number"?document.createTextNode(String(c)):c);
+  });
+  return el;
+};
+
+const card=(children,extraStyle={})=>h("div",{style:{background:WHITE,border:`1.5px solid ${PINK}44`,borderRadius:"16px",padding:"1.2rem",marginBottom:"1rem",...extraStyle}},children);
+const sectionTitle=(txt)=>h("div",{style:{textAlign:"center",marginBottom:"1.5rem"}},[
+  h("h2",{style:{fontSize:"21px",fontWeight:"800",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",margin:"0"}},txt),
+  h("div",{style:{height:"3px",width:"60px",background:grad,borderRadius:"99px",margin:"8px auto 0"}}),
+]);
+const pill=(label,active,onClick)=>h("button",{style:{padding:"6px 14px",borderRadius:"99px",border:"1.5px solid",borderColor:active?PINK:"#e5e7eb",fontWeight:active?"700":"400",background:active?grad:WHITE,color:active?WHITE:GRAY,cursor:"pointer",fontSize:"12px",marginBottom:"4px",marginRight:"4px"},onClick},label);
+const gradBtn=(text,onClick,extraStyle={})=>h("button",{style:{background:grad,border:"none",borderRadius:"10px",padding:"8px 16px",color:WHITE,fontWeight:"700",cursor:"pointer",...extraStyle},onClick},text);
+
+function checkList(items,checked,onToggle){
+  return h("div",{style:{display:"flex",flexDirection:"column",gap:"6px"}},
+    items.map((item,i)=>{
+      const lbl=h("label",{style:{display:"flex",alignItems:"center",gap:"8px",cursor:"pointer",fontSize:"14px"}});
+      const cb=h("input",{type:"checkbox",checked:!!checked?.[i],style:{accentColor:PINK,width:"16px",height:"16px"}});
+      cb.addEventListener("change",()=>onToggle(i));
+      const sp=h("span",{style:{textDecoration:checked?.[i]?"line-through":"none",color:checked?.[i]?GRAY:"#1f2937"}},item);
+      lbl.appendChild(cb); lbl.appendChild(sp); return lbl;
+    })
+  );
+}
+
+function todoList(todos,onUpdate){
+  const wrap=h("div",{});
+  const row=h("div",{style:{display:"flex",gap:"8px",marginBottom:"10px"}});
+  const inp=h("input",{type:"text",placeholder:"+",style:{flex:"1",padding:"8px 12px",borderRadius:"10px",border:`1.5px solid ${PINK}55`,fontSize:"14px",outline:"none"}});
+  const addBtn=gradBtn("+",()=>{
+    if(inp.value.trim()){onUpdate([...todos,{text:inp.value.trim(),done:false}]);inp.value="";}
+  });
+  row.appendChild(inp); row.appendChild(addBtn);
+  wrap.appendChild(row);
+  todos.forEach((t,i)=>{
+    const item=h("div",{style:{display:"flex",alignItems:"center",gap:"8px",padding:"6px 0",borderBottom:`1px solid ${PINK}22`}});
+    const cb=h("input",{type:"checkbox",checked:t.done,style:{accentColor:PINK,width:"16px",height:"16px"}});
+    cb.addEventListener("change",()=>{const n=[...todos];n[i]={...n[i],done:!n[i].done};onUpdate(n);});
+    const sp=h("span",{style:{flex:"1",fontSize:"14px",textDecoration:t.done?"line-through":"none",color:t.done?GRAY:"#1f2937"}},t.text);
+    const del=h("button",{style:{background:"none",border:"none",color:"#f87171",cursor:"pointer",fontSize:"16px"}},t.done?"×":"×");
+    del.addEventListener("click",()=>onUpdate(todos.filter((_,j)=>j!==i)));
+    item.appendChild(cb);item.appendChild(sp);item.appendChild(del);
+    wrap.appendChild(item);
+  });
+  return wrap;
+}
+
+const iStyle={width:"100%",padding:"8px 12px",borderRadius:"10px",border:`1.5px solid ${PINK}55`,fontSize:"14px",outline:"none",boxSizing:"border-box"};
+const taStyle={...iStyle,minHeight:"90px",resize:"vertical",fontFamily:"inherit"};
+
+function makeInput(val,onChange,extraStyle={}){
+  const el=h("input",{type:"text",style:{...iStyle,...extraStyle}});
+  el.value=val||"";
+  el.addEventListener("input",e=>onChange(e.target.value));
+  return el;
+}
+function makeTextarea(val,onChange,rows=3,extraStyle={}){
+  const el=h("textarea",{style:{...taStyle,...extraStyle}});
+  el.value=val||"";
+  el.addEventListener("input",e=>onChange(e.target.value));
+  return el;
+}
+
+// ── SECTIONS ───────────────────────────────────────────────────────────
+function renderHome(){
+  const s=state;
+  const q=MQ()[s.quoteIdx%MQ().length];
+  const fig=POLE_FIGS[s.figIdx];
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+
+  wrap.appendChild(sectionTitle(tx("homeGreeting")));
+
+  // Quote card
+  const qcard=h("div",{style:{background:grad,borderRadius:"16px",padding:"1.4rem",marginBottom:"1rem",textAlign:"center"}});
+  qcard.appendChild(h("p",{style:{margin:"0 0 10px",fontSize:"15px",color:WHITE,fontStyle:"italic",lineHeight:"1.7",fontWeight:"600"}},`"${q}"`));
+  const qbtn=h("button",{style:{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:"99px",padding:"5px 16px",color:WHITE,fontSize:"12px",cursor:"pointer"}},tx("anotherQuote"));
+  qbtn.addEventListener("click",()=>setState({quoteIdx:(s.quoteIdx+1)%MQ().length}));
+  qcard.appendChild(qbtn);
+  wrap.appendChild(qcard);
+
+  // Pole figures
+  const fc=card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0",marginBottom:"8px"}},tx("poleFigures")),
+    h("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},([
+      (()=>{const b=h("button",{style:{width:"34px",height:"34px",borderRadius:"99px",border:`1.5px solid ${PINK}44`,background:WHITE,fontSize:"18px",cursor:"pointer",color:VIOLET}},"‹");b.addEventListener("click",()=>setState({figIdx:(s.figIdx-1+POLE_FIGS.length)%POLE_FIGS.length}));return b;})(),
+      h("div",{style:{flex:"1",background:gradS("#fdf4ff","#ede9fe"),borderRadius:"14px",padding:"1.2rem",textAlign:"center"}},[
+        h("p",{style:{margin:"0 0 6px",fontWeight:"800",fontSize:"16px",color:VIOLET}},fig.label),
+        h("p",{style:{margin:"0",fontSize:"13px",color:"#7c3aed",lineHeight:"1.6"}},fig.desc[s.lang]||fig.desc.en),
+      ]),
+      (()=>{const b=h("button",{style:{width:"34px",height:"34px",borderRadius:"99px",border:`1.5px solid ${PINK}44`,background:WHITE,fontSize:"18px",cursor:"pointer",color:VIOLET}},"›");b.addEventListener("click",()=>setState({figIdx:(s.figIdx+1)%POLE_FIGS.length}));return b;})(),
+    ])),
+    h("div",{style:{display:"flex",justifyContent:"center",gap:"6px",marginTop:"10px"}},
+      POLE_FIGS.map((_,i)=>{const d=h("div",{style:{width:"8px",height:"8px",borderRadius:"99px",background:s.figIdx===i?VIOLET:"#e9d5ff",cursor:"pointer"}});d.addEventListener("click",()=>setState({figIdx:i}));return d;})
+    ),
+  ]));
+  wrap.appendChild(fc);
+
+  // Quick nav grid
+  const SLS=SL();
+  const grid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"1rem"}});
+  [{label:SLS.daily,icon:"☀️",id:"daily"},{label:SLS.pole,icon:"💫",id:"pole"},{label:SLS.mindset,icon:"🧠",id:"mindset"},{label:SLS.goals,icon:"🎯",id:"goals"},{label:SLS.goalquestions,icon:"❓",id:"goalquestions"},{label:SLS.stickers,icon:"🌟",id:"stickers"}].forEach(b=>{
+    const btn=h("button",{style:{padding:"1rem",borderRadius:"14px",border:`1.5px solid ${PINK}44`,background:WHITE,cursor:"pointer",fontSize:"12px",fontWeight:"600",color:VIOLET}});
+    btn.appendChild(h("div",{style:{fontSize:"22px",marginBottom:"4px"}},b.icon));
+    btn.appendChild(document.createTextNode(b.label));
+    btn.addEventListener("click",()=>setState({section:b.id}));
+    grid.appendChild(btn);
+  });
+  wrap.appendChild(grid);
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("howToUse")),h("ul",{style:{paddingLeft:"18px",fontSize:"13px",color:"#374151",lineHeight:"2",margin:"0"}},[...["Use ☰ to navigate","Fill in Daily every day","Track tricks in Pole Workout","Answer Goal Questions weekly","Add stickers when you reach goals"].map(t=>h("li",{},t))])])));
+  return wrap;
+}
+
+function renderCalendar(){
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("calendarTitle")));
+  const grid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
+  MONTHS().forEach((mName,mi)=>{
+    const days=getDaysInMonth(mi);
+    const mc=h("div",{style:{background:WHITE,border:`1.5px solid ${PINK}44`,borderRadius:"14px",padding:"0.7rem"}});
+    mc.appendChild(h("p",{style:{margin:"0 0 5px",fontWeight:"700",fontSize:"12px",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},mName));
+    const g=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:"1px",fontSize:"9px"}});
+    DAYS_S().forEach(d=>g.appendChild(h("div",{style:{textAlign:"center",color:GRAY,fontWeight:"700",padding:"2px 0"}},d)));
+    days.forEach(d=>{
+      const isH=d&&getHoliday(mi,d),isT=d&&mi===today.getMonth()&&d===today.getDate();
+      const cell=h("div",{style:{textAlign:"center",padding:"2px 0",borderRadius:"3px",background:isT?PINK:isH?"#ede9fe":"transparent",color:isT?WHITE:isH?VIOLET:d?"#1f2937":"transparent",fontWeight:isH||isT?"700":"400"}},d||"");
+      if(isH) cell.title=isH;
+      g.appendChild(cell);
+    });
+    mc.appendChild(g);
+    grid.appendChild(mc);
+  });
+  wrap.appendChild(grid);
+  return wrap;
+}
+
+function renderMonthly(){
+  const s=state;
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("monthlyTitle")));
+  // Month pills
+  const pills=h("div",{style:{display:"flex",gap:"4px",flexWrap:"wrap",marginBottom:"1rem"}});
+  MONTHS().forEach((m,i)=>pills.appendChild(pill(m.slice(0,3),s.selMonth===i,()=>setState({selMonth:i}))));
+  wrap.appendChild(pills);
+
+  const mdata=s.daily[`monthly_${s.selMonth}`]||{obj:""};
+  const days=getDaysInMonth(s.selMonth);
+  const calCard=card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},`${MONTHS()[s.selMonth]} 2026`),
+    (()=>{
+      const g=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:"2px",fontSize:"11px",marginBottom:"6px"}});
+      DAYS_S().forEach(d=>g.appendChild(h("div",{style:{textAlign:"center",color:GRAY,fontWeight:"700",padding:"3px 0"}},d)));
+      days.forEach(d=>{
+        const isH=d&&getHoliday(s.selMonth,d),isT=d&&s.selMonth===today.getMonth()&&d===today.getDate();
+        const dk=d?`2026-${String(s.selMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`:null;
+        const hasTodo=dk&&s.daily[dk]?.todo?.length>0;
+        const cell=h("div",{style:{textAlign:"center",padding:"5px 2px",borderRadius:"8px",background:isT?grad:isH?"#fdf4ff":"transparent",color:isT?WHITE:isH?VIOLET:d?"#1f2937":"transparent",fontWeight:isT||isH?"700":"400",cursor:d?"pointer":"default",border:d&&!isT?`1px solid ${PINK}22`:"none"}},d||"");
+        if(d) cell.addEventListener("click",()=>setState({selDay:dk,section:"daily"}));
+        if(hasTodo){const dot=h("div",{style:{width:"4px",height:"4px",borderRadius:"99px",background:PINK,margin:"1px auto 0"}});cell.appendChild(dot);}
+        g.appendChild(cell);
+      });
+      return g;
+    })(),
+  ]));
+  wrap.appendChild(calCard);
+
+  const goCard=card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},`${tx("monthlyGoals")} ${MONTHS()[s.selMonth]}`),
+    (()=>{
+      const ta=makeTextarea(mdata.obj,v=>setState({daily:{...s.daily,[`monthly_${s.selMonth}`]:{...mdata,obj:v}}}));
+      return ta;
+    })(),
+    h("p",{style:{fontWeight:"700",fontSize:"13px",color:"#be185d",margin:"12px 0 8px"}},tx("habitTracker")),
+    (()=>{
+      const g=h("div",{style:{display:"grid",gridTemplateColumns:"auto repeat(5,1fr)",gap:"3px",fontSize:"11px"}});
+      ["","L","M","M","G","V"].forEach(d=>g.appendChild(h("div",{style:{textAlign:"center",fontWeight:"700",color:GRAY}},d)));
+      HL().forEach(hab=>{
+        g.appendChild(h("div",{style:{fontSize:"10px",color:"#374151",alignSelf:"center"}},hab));
+        [0,1,2,3,4].forEach(wi=>{
+          const k=`habit_${s.selMonth}_${hab}_${wi}`,checked=s.daily[k];
+          const cell=h("div",{style:{width:"20px",height:"20px",borderRadius:"5px",border:`1.5px solid ${PINK}44`,background:checked?grad:WHITE,cursor:"pointer",margin:"0 auto"}});
+          cell.addEventListener("click",()=>setState({daily:{...s.daily,[k]:!checked}}));
+          g.appendChild(cell);
+        });
+      });
+      return g;
+    })(),
+  ]));
+  wrap.appendChild(goCard);
+  return wrap;
+}
+
+function renderDaily(){
+  const s=state;
+  const dk=dayKey();
+  const d=getDayData(dk);
+  const upd=(key,val)=>setDayData(dk,{...d,[key]:val});
+  const qi=getDayIndex(dk)%MQ().length;
+  const qqi=getDayIndex(dk)%DQ().length;
+
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("dailyTitle")));
+
+  const dateinp=h("input",{type:"date",style:{...iStyle,marginBottom:"1rem"}});
+  dateinp.value=dk;
+  dateinp.addEventListener("change",e=>setState({selDay:e.target.value}));
+  wrap.appendChild(dateinp);
+
+  // Hero card
+  const hero=h("div",{style:{background:grad,borderRadius:"16px",padding:"1.2rem",marginBottom:"1rem",position:"relative",overflow:"hidden"}});
+  hero.appendChild(h("p",{style:{margin:"0 0 2px",fontSize:"12px",color:"rgba(255,255,255,0.8)",fontWeight:"600"}},new Date(dk+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",day:"numeric",month:"long"})));
+  hero.appendChild(h("p",{style:{margin:"0 0 10px",fontSize:"14px",color:WHITE,fontStyle:"italic",lineHeight:"1.7"}},`"${MQ()[qi]}"`));
+  hero.appendChild(h("div",{style:{height:"1px",background:"rgba(255,255,255,0.3)",margin:"8px 0"}}));
+  hero.appendChild(h("p",{style:{margin:"6px 0 4px",fontSize:"11px",color:"rgba(255,255,255,0.75)",fontWeight:"700",letterSpacing:"1px"}},tx("questionOfDay")));
+  hero.appendChild(h("p",{style:{margin:"0",fontSize:"13px",color:WHITE,fontWeight:"600",lineHeight:"1.6"}},DQ()[qqi]));
+  wrap.appendChild(hero);
+
+  // My answer
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:VIOLET,marginTop:"0"}},tx("myAnswer")),makeTextarea(d.qanswer,v=>upd("qanswer",v),3,{minHeight:"70px"})])));
+
+  // Mood
+  const moodCard=h("div",{style:{background:gradS("#fce7f3","#ede9fe"),borderRadius:"14px",padding:"1rem",marginBottom:"1rem"}});
+  moodCard.appendChild(h("p",{style:{margin:"0 0 8px",fontWeight:"700",color:"#7c3aed"}},tx("mood")));
+  const moodRow=h("div",{style:{display:"flex",gap:"12px",justifyContent:"center"}});
+  ["💀","😔","😐","🙂","🤩"].forEach((m,i)=>{
+    const btn=h("button",{style:{fontSize:"26px",background:"none",border:"none",cursor:"pointer",opacity:d.mood===i?"1":"0.4",transform:d.mood===i?"scale(1.3)":"scale(1)",transition:"all .2s"}},m);
+    btn.addEventListener("click",()=>upd("mood",i));
+    moodRow.appendChild(btn);
+  });
+  moodCard.appendChild(moodRow);
+  wrap.appendChild(moodCard);
+
+  // Morning
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("morning")),checkList(MORN(),d.morning,i=>{const n=[...(d.morning||[])];n[i]=!n[i];upd("morning",n);})])));
+
+  // Intention
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:VIOLET,marginTop:"0"}},tx("intention")),makeInput(d.intention,v=>upd("intention",v))])));
+
+  // Top 3
+  const top3c=card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("top3"))]));
+  [0,1,2].forEach(i=>{
+    const row=h("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}});
+    row.appendChild(h("div",{style:{width:"22px",height:"22px",borderRadius:"99px",background:grad,color:WHITE,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"800",flexShrink:"0"}},String(i+1)));
+    const inp=h("input",{type:"text",style:{...iStyle,flex:"1"}});
+    inp.value=(d.priorities||[])[i]||"";
+    inp.addEventListener("input",e=>{const p=[...(d.priorities||["","",""])];p[i]=e.target.value;upd("priorities",p);});
+    row.appendChild(inp);
+    top3c.querySelector("div").appendChild(row);
+  });
+  wrap.appendChild(top3c);
+
+  // Todo
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:VIOLET,marginTop:"0"}},tx("todo")),todoList(d.todo||[],v=>upd("todo",v))])));
+
+  // Energy
+  const ec=card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("energy"))]));
+  const energyDiv=ec.querySelector("div");
+  const energyRow=h("div",{style:{marginBottom:"10px"}});
+  const elabel=h("div",{style:{display:"flex",justifyContent:"space-between",fontSize:"13px",marginBottom:"3px"}});
+  elabel.appendChild(h("span",{style:{fontWeight:"600",color:"#374151"}},tx("energyLevel")));
+  const eVal=h("span",{style:{color:VIOLET}},`${d.energy||5}/10`);
+  elabel.appendChild(eVal);
+  energyRow.appendChild(elabel);
+  const eslider=h("input",{type:"range",min:"1",max:"10",step:"1",style:{width:"100%",accentColor:PINK}});
+  eslider.value=d.energy||5;
+  eslider.addEventListener("input",e=>{eVal.textContent=`${e.target.value}/10`;upd("energy",Number(e.target.value));});
+  energyRow.appendChild(eslider);
+  energyDiv.appendChild(energyRow);
+  energyDiv.appendChild(h("p",{style:{fontSize:"13px",fontWeight:"600",color:"#374151",margin:"0 0 6px"}},tx("glasses")));
+  const waterRow=h("div",{style:{display:"flex",gap:"5px",flexWrap:"wrap"}});
+  [1,2,3,4,5,6,7,8].forEach(n=>{
+    const btn=h("button",{style:{width:"30px",height:"30px",borderRadius:"8px",border:`1.5px solid ${PINK}44`,background:(d.water||0)>=n?grad:WHITE,color:(d.water||0)>=n?WHITE:GRAY,fontWeight:"700",fontSize:"11px",cursor:"pointer"}},String(n));
+    btn.addEventListener("click",()=>{ upd("water",n); render(); });
+    waterRow.appendChild(btn);
+  });
+  energyDiv.appendChild(waterRow);
+  wrap.appendChild(ec);
+
+  // Gratitude
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("gratitude")),makeTextarea(d.gratitude,v=>upd("gratitude",v))])));
+
+  // Notes
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:VIOLET,marginTop:"0"}},tx("notes")),makeTextarea(d.notes,v=>upd("notes",v),4,{minHeight:"80px"})])));
+
+  // Win
+  const winCard=card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#7c3aed",marginTop:"0"}},tx("win")),makeTextarea(d.win,v=>upd("win",v),3,{background:"rgba(255,255,255,0.7)",border:`1.5px solid ${PINK}44`})]),{background:gradS("#fce7f3","#ede9fe"),border:"none"});
+  wrap.appendChild(winCard);
+
+  // Night
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("night")),checkList(NGHT(),d.night,i=>{const n=[...(d.night||[])];n[i]=!n[i];upd("night",n);})])));
+
+  // Day rating
+  const DR={it:["","Giornata difficile, ma ci sei.","Passo dopo passo.","Giornata valida!","Bella giornata!","Giornata TOP!"],en:["","Tough day, but you showed up.","Step by step.","Solid day!","Great day!","TOP day!"],fr:["","Journée difficile.","Un pas après l'autre.","Bonne journée!","Belle journée!","Journée TOP!"],ar:["","يوم صعب.","خطوة بخطوة.","يوم جيد!","يوم رائع!","يوم مميز!"],de:["","Schwerer Tag.","Schritt für Schritt.","Solider Tag!","Toller Tag!","TOP Tag!"],es:["","Día difícil.","Paso a paso.","¡Buen día!","¡Gran día!","¡Día TOP!"],pt:["","Dia difícil.","Passo a passo.","Dia sólido!","Ótimo dia!","Dia TOP!"],nl:["","Zware dag.","Stap voor stap.","Goede dag!","Geweldige dag!","TOP dag!"]};
+  const drData=DR[s.lang]||DR.en;
+  const ratingCard=card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:VIOLET,marginTop:"0"}},tx("dayRating"))]));
+  const ratingDiv=ratingCard.querySelector("div");
+  const starRow=h("div",{style:{display:"flex",gap:"8px",justifyContent:"center"}});
+  const ratingMsg=h("p",{style:{textAlign:"center",fontSize:"13px",color:VIOLET,margin:"8px 0 0",fontWeight:"600"}},d.dayrating>0?drData[d.dayrating]:"");
+  [1,2,3,4,5].forEach(n=>{
+    const btn=h("button",{style:{fontSize:"26px",background:"none",border:"none",cursor:"pointer",opacity:(d.dayrating||0)>=n?"1":"0.25",transition:"all .15s"}},"⭐");
+    btn.addEventListener("click",()=>{upd("dayrating",n);ratingMsg.textContent=drData[n];render();});
+    starRow.appendChild(btn);
+  });
+  ratingDiv.appendChild(starRow);
+  ratingDiv.appendChild(ratingMsg);
+  wrap.appendChild(ratingCard);
+
+  return wrap;
+}
+
+function renderPole(){
+  const s=state;
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(SL().pole+" 💫"));
+
+  const alertC=h("div",{style:{background:gradS("#fce7f3","#ede9fe"),borderRadius:"14px",padding:"1rem",marginBottom:"1rem"}});
+  alertC.appendChild(h("p",{style:{margin:"0",fontWeight:"700",color:"#7c3aed",fontSize:"14px"}},tx("poleWarmup")));
+  wrap.appendChild(alertC);
+
+  // Warmup
+  const wuCard=card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("warmupTitle")),
+    ...WU().map((w,i)=>h("div",{style:{display:"flex",alignItems:"center",gap:"8px",padding:"5px 0",borderBottom:`1px solid ${PINK}22`,fontSize:"13px"}},[
+      h("div",{style:{width:"20px",height:"20px",borderRadius:"99px",background:grad,color:WHITE,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"11px",fontWeight:"700",flexShrink:"0"}},String(i+1)),w
+    ])),
+  ]));
+  wrap.appendChild(wuCard);
+
+  // Tricks
+  const trickCard=card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("trickTracker")),
+    h("div",{style:{display:"flex",gap:"6px",marginBottom:"8px",flexWrap:"wrap"}},[
+      ...["🌱","🔥","⭐"].map((l,i)=>h("div",{style:{padding:"3px 8px",borderRadius:"99px",background:["#fce7f3","#ede9fe","#d1fae5"][i],color:["#be185d","#7c3aed","#065f46"][i],fontSize:"11px",fontWeight:"600"}},l))
+    ]),
+    ...TRICKS.map(trick=>{
+      const st=s.tricks[trick]||0;
+      const row=h("div",{style:{display:"flex",alignItems:"center",gap:"8px",padding:"6px 8px",borderRadius:"10px",background:st===2?"#f0fdf4":st===1?"#fdf4ff":"#fafafa",border:`1px solid ${["#e5e7eb","#e9d5ff","#bbf7d0"][st]}`,marginBottom:"4px"}});
+      row.appendChild(h("span",{style:{flex:"1",fontSize:"13px",fontWeight:st===2?"700":"400"}},trick));
+      ["🌱","🔥","⭐"].forEach((em,si)=>{
+        const btn=h("button",{style:{fontSize:"15px",background:"none",border:"none",cursor:"pointer",opacity:st===si?"1":"0.3"}},em);
+        btn.addEventListener("click",()=>setState({tricks:{...s.tricks,[trick]:si}}));
+        row.appendChild(btn);
+      });
+      return row;
+    }),
+  ]));
+  wrap.appendChild(trickCard);
+
+  wrap.appendChild(card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("sessionLog")),
+    makeTextarea(s.daily[`pole_${todayKey()}`]||"",v=>setState({daily:{...s.daily,[`pole_${todayKey()}`]:v}}),5,{minHeight:"120px"}),
+  ])));
+
+  return wrap;
+}
+
+function renderFitness(){
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("fitnessTitle")));
+  wrap.appendChild(card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},"Pilates"),
+    ...[{n:"Hundred",r:"100",l:"base"},{n:"Roll Up",r:"10",l:"base"},{n:"Leg Circle",r:"8/side",l:"base"},{n:"Single Leg Stretch",r:"10/side",l:"base"},{n:"Double Leg Stretch",r:"10",l:"mid"},{n:"Criss Cross",r:"10/side",l:"mid"},{n:"Teaser",r:"8",l:"adv"},{n:"Swan Dive",r:"8",l:"mid"},{n:"Side Kick",r:"12/side",l:"base"},{n:"Boomerang",r:"6",l:"adv"},{n:"Rolling Ball",r:"10",l:"base"},{n:"Plank Hold",r:"3x30s",l:"base"}].map(ex=>
+      h("div",{style:{display:"flex",alignItems:"center",gap:"8px",padding:"7px 8px",borderRadius:"10px",background:"#fdf4ff",border:`1px solid ${PINK}33`,marginBottom:"5px"}},[
+        h("div",{style:{flex:"1"}},[h("p",{style:{margin:"0",fontWeight:"600",fontSize:"13px"}},ex.n),h("p",{style:{margin:"0",fontSize:"11px",color:GRAY}},ex.r)]),
+        h("span",{style:{fontSize:"10px",padding:"2px 7px",borderRadius:"99px",background:ex.l==="adv"?"#ede9fe":ex.l==="mid"?"#fce7f3":"#d1fae5",color:ex.l==="adv"?VIOLET:ex.l==="mid"?PINK:"#065f46",fontWeight:"600"}},ex.l),
+      ])
+    ),
+  ])));
+  wrap.appendChild(card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:VIOLET,marginTop:"0"}},"Stretching"),
+    ...[{n:"Pancake",d:"60s"},{n:"Pigeon Pose",d:"60s/side"},{n:"Straddle",d:"60s"},{n:"Front Split",d:"60s/side"},{n:"Shoulder stretch",d:"30s/side"},{n:"Bridge",d:"30s x3"},{n:"Mermaid",d:"45s/side"},{n:"Cobra",d:"30s x3"},{n:"Hip flexor lunge",d:"45s/side"},{n:"Butterfly",d:"60s"}].map(s=>
+      h("div",{style:{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:`1px solid ${PINK}22`,fontSize:"13px"}},[
+        h("span",{style:{fontWeight:"600"}},s.n),h("span",{style:{color:VIOLET,fontWeight:"700"}},s.d),
+      ])
+    ),
+  ])));
+  return wrap;
+}
+
+function renderNutrition(){
+  const s=state;
+  const MEAL_L={it:[{meal:"Colazione",opts:["Porridge + frutti rossi","Yogurt greco + granola","Uova + avocado","Smoothie proteico"]},{meal:"Spuntino",opts:["Frutta + noci","Gallette + hummus","Cottage cheese","Dattero + mandorle"]},{meal:"Pranzo",opts:["Riso + salmone + verdure","Pasta integrale + legumi","Quinoa + pollo","Insalata + tonno"]},{meal:"Pre-allenamento",opts:["Banana + noci","Toast + marmellata","Dattero + proteine","Mela + burro mandorle"]},{meal:"Post-allenamento",opts:["Frullato proteico","Ricotta + miele","Uova sode + frutta","Yogurt + cereali"]},{meal:"Cena",opts:["Merluzzo + patate dolci","Tofu + riso","Pollo + quinoa","Uova al forno + verdure"]}],en:[{meal:"Breakfast",opts:["Porridge + berries","Greek yogurt + granola","Eggs + avocado","Protein smoothie"]},{meal:"Snack",opts:["Fruit + nuts","Rice cakes + hummus","Cottage cheese","Date + almonds"]},{meal:"Lunch",opts:["Rice + salmon + veg","Wholemeal pasta + legumes","Quinoa + chicken","Salad + tuna"]},{meal:"Pre-workout",opts:["Banana + nuts","Wholemeal toast + jam","Date + protein","Apple + almond butter"]},{meal:"Post-workout",opts:["Protein shake","Ricotta + honey","Boiled eggs + fruit","Yogurt + cereals"]},{meal:"Dinner",opts:["Cod + sweet potato","Tofu + rice","Chicken + quinoa","Baked eggs + veg"]}],fr:[{meal:"Petit-déjeuner",opts:["Porridge + fruits","Yaourt + granola","Œufs + avocat","Smoothie"]},{meal:"Collation",opts:["Fruits + noix","Galettes + houmous","Fromage blanc","Datte"]},{meal:"Déjeuner",opts:["Riz + saumon","Pâtes + légumineuses","Quinoa + poulet","Salade + thon"]},{meal:"Pré-entraînement",opts:["Banane + noix","Toast + confiture","Datte + protéines","Pomme + beurre"]},{meal:"Post-entraînement",opts:["Shake","Fromage + miel","Œufs + fruits","Yaourt"]},{meal:"Dîner",opts:["Cabillaud","Tofu + riz","Poulet + quinoa","Œufs au four"]}],ar:[{meal:"الإفطار",opts:["عصيدة + توت","زبادي + غرانولا","بيض + أفوكادو","سموذي"]},{meal:"وجبة خفيفة",opts:["فواكه + مكسرات","أقراص + حمص","جبن قريش","تمر"]},{meal:"الغداء",opts:["أرز + سلمون","معكرونة + بقوليات","كينوا + دجاج","سلطة + تونة"]},{meal:"قبل التمرين",opts:["موز + مكسرات","توست + مربى","تمر + بروتين","تفاح"]},{meal:"بعد التمرين",opts:["مخفوق","ريكوتا + عسل","بيض مسلوق","زبادي"]},{meal:"العشاء",opts:["سمك القد","توفو + أرز","دجاج + كينوا","بيض في الفرن"]}],de:[{meal:"Frühstück",opts:["Porridge + Beeren","Joghurt + Granola","Eier + Avocado","Proteinshake"]},{meal:"Snack",opts:["Obst + Nüsse","Reiskuchen + Hummus","Hüttenkäse","Dattel"]},{meal:"Mittagessen",opts:["Reis + Lachs","Nudeln + Hülsenfrüchte","Quinoa + Hähnchen","Salat + Thunfisch"]},{meal:"Vor Training",opts:["Banane + Nüsse","Toast + Marmelade","Dattel + Protein","Apfel"]},{meal:"Nach Training",opts:["Proteinshake","Ricotta + Honig","Eier + Obst","Joghurt"]},{meal:"Abendessen",opts:["Kabeljau","Tofu + Reis","Hähnchen + Quinoa","Gebackene Eier"]}],es:[{meal:"Desayuno",opts:["Porridge + bayas","Yogur + granola","Huevos + aguacate","Batido"]},{meal:"Snack",opts:["Fruta + nueces","Tortitas + hummus","Queso cottage","Dátil"]},{meal:"Almuerzo",opts:["Arroz + salmón","Pasta + legumbres","Quinoa + pollo","Ensalada + atún"]},{meal:"Pre-entreno",opts:["Plátano + nueces","Tostada + mermelada","Dátil + proteína","Manzana"]},{meal:"Post-entreno",opts:["Batido","Ricotta + miel","Huevos + fruta","Yogur"]},{meal:"Cena",opts:["Bacalao","Tofu + arroz","Pollo + quinoa","Huevos al horno"]}],pt:[{meal:"Café da manhã",opts:["Mingau + frutas","Iogurte + granola","Ovos + abacate","Vitamina"]},{meal:"Lanche",opts:["Fruta + nozes","Bolachas + homus","Cottage","Tâmara"]},{meal:"Almoço",opts:["Arroz + salmão","Massa + leguminosas","Quinoa + frango","Salada + atum"]},{meal:"Pré-treino",opts:["Banana + nozes","Torrada + geleia","Tâmara + proteína","Maçã"]},{meal:"Pós-treino",opts:["Shake","Ricota + mel","Ovos + fruta","Iogurte"]},{meal:"Jantar",opts:["Bacalhau","Tofu + arroz","Frango + quinoa","Ovos assados"]}],nl:[{meal:"Ontbijt",opts:["Havermout + bessen","Yoghurt + granola","Eieren + avocado","Smoothie"]},{meal:"Snack",opts:["Fruit + noten","Rijstwafels + hummus","Kwark","Dadel"]},{meal:"Lunch",opts:["Rijst + zalm","Pasta + peulvruchten","Quinoa + kip","Salade + tonijn"]},{meal:"Pre-training",opts:["Banaan + noten","Toast + jam","Dadel + eiwit","Appel"]},{meal:"Post-training",opts:["Shake","Ricotta + honing","Eieren + fruit","Yoghurt"]},{meal:"Avondeten",opts:["Kabeljauw","Tofu + rijst","Kip + quinoa","Gebakken eieren"]}]};
+  const MP=MEAL_L[s.lang]||MEAL_L.en;
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("nutritionTitle")));
+  wrap.appendChild(card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("macros")),
+    h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px",marginBottom:"10px"}},[
+      ...[{l:"Protein",v:"~30%",c:PINK},{l:"Carb",v:"~45%",c:VIOLET},{l:"Fat",v:"~25%",c:"#f59e0b"}].map(m=>h("div",{style:{textAlign:"center",padding:"8px",borderRadius:"10px",background:"#fdf4ff",border:`1.5px solid ${m.c}44`}},[h("p",{style:{margin:"0",fontWeight:"800",fontSize:"16px",color:m.c}},m.v),h("p",{style:{margin:"0",fontSize:"10px",color:GRAY}},m.l)]))
+    ]),
+  ])));
+  const mpCard=card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:VIOLET,marginTop:"0"}},"Meal Plan"),
+    ...MP.map(m=>h("div",{style:{borderRadius:"10px",border:`1.5px solid ${PINK}33`,overflow:"hidden",marginBottom:"7px"}},[
+      h("div",{style:{background:grad,padding:"5px 10px"}},h("p",{style:{margin:"0",fontWeight:"700",color:WHITE,fontSize:"12px"}},m.meal)),
+      h("div",{style:{padding:"6px 10px",background:WHITE}},m.opts.map(o=>h("p",{style:{margin:"2px 0",fontSize:"12px",color:"#374151"}},`• ${o}`))),
+    ])),
+  ]));
+  wrap.appendChild(mpCard);
+  wrap.appendChild(card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},"My plan"),
+    makeTextarea(s.daily["meal_custom"]||"",v=>setState({daily:{...s.daily,meal_custom:v}}),5,{minHeight:"120px"}),
+  ])));
+  return wrap;
+}
+
+function renderBody(){
+  const s=state;
+  const ML={it:[["weight","Peso (kg)"],["bust","Busto (cm)"],["waist","Vita (cm)"],["hips","Fianchi (cm)"],["thigh","Coscia (cm)"]],en:[["weight","Weight (kg)"],["bust","Bust (cm)"],["waist","Waist (cm)"],["hips","Hips (cm)"],["thigh","Thigh (cm)"]],fr:[["weight","Poids (kg)"],["bust","Poitrine (cm)"],["waist","Taille (cm)"],["hips","Hanches (cm)"],["thigh","Cuisse (cm)"]],ar:[["weight","الوزن (كغ)"],["bust","الصدر (سم)"],["waist","الخصر (سم)"],["hips","الوركين (سم)"],["thigh","الفخذ (سم)"]],de:[["weight","Gewicht (kg)"],["bust","Brust (cm)"],["waist","Taille (cm)"],["hips","Hüfte (cm)"],["thigh","Oberschenkel (cm)"]],es:[["weight","Peso (kg)"],["bust","Pecho (cm)"],["waist","Cintura (cm)"],["hips","Caderas (cm)"],["thigh","Muslo (cm)"]],pt:[["weight","Peso (kg)"],["bust","Busto (cm)"],["waist","Cintura (cm)"],["hips","Quadril (cm)"],["thigh","Coxa (cm)"]],nl:[["weight","Gewicht (kg)"],["bust","Borst (cm)"],["waist","Taille (cm)"],["hips","Heupen (cm)"],["thigh","Dij (cm)"]]};
+  const WL={it:["Energia","Qualità sonno","Forza percepita","Flessibilità","Umore"],en:["Energy","Sleep quality","Perceived strength","Flexibility","Mood"],fr:["Énergie","Qualité sommeil","Force perçue","Flexibilité","Humeur"],ar:["الطاقة","جودة النوم","القوة","المرونة","المزاج"],de:["Energie","Schlafqualität","Kraft","Flexibilität","Stimmung"],es:["Energía","Sueño","Fuerza","Flexibilidad","Ánimo"],pt:["Energia","Sono","Força","Flexibilidade","Humor"],nl:["Energie","Slaap","Kracht","Flexibiliteit","Stemming"]};
+  const measures=ML[s.lang]||ML.en;
+  const wlabels=WL[s.lang]||WL.en;
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("bodyTitle")));
+  const mc=card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("measurements"))]));
+  const grid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}});
+  measures.forEach(([k,label])=>{
+    const d=h("div",{});
+    d.appendChild(h("p",{style:{fontSize:"12px",color:GRAY,margin:"0 0 4px",fontWeight:"600"}},label));
+    const inp=h("input",{type:"number",style:{...iStyle}});
+    inp.value=s.body[k]||"";
+    inp.addEventListener("input",e=>setState({body:{...s.body,[k]:e.target.value}}));
+    d.appendChild(inp);
+    grid.appendChild(d);
+  });
+  mc.querySelector("div").appendChild(grid);
+  mc.querySelector("div").appendChild(h("p",{style:{fontWeight:"700",fontSize:"13px",color:VIOLET,margin:"12px 0 5px"}},"Notes"));
+  mc.querySelector("div").appendChild(makeTextarea(s.body.notes,v=>setState({body:{...s.body,notes:v}})));
+  wrap.appendChild(mc);
+  const wc=card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("wellbeing"))]));
+  wlabels.forEach(label=>{
+    const d=h("div",{style:{marginBottom:"10px"}});
+    const lr=h("div",{style:{display:"flex",justifyContent:"space-between",fontSize:"13px",marginBottom:"2px"}});
+    lr.appendChild(h("span",{style:{fontWeight:"600",color:"#374151"}},label));
+    const val=h("span",{style:{color:VIOLET}},`${s.daily[`body_${label}`]||5}/10`);
+    lr.appendChild(val);
+    d.appendChild(lr);
+    const sl=h("input",{type:"range",min:"1",max:"10",step:"1",style:{width:"100%",accentColor:PINK}});
+    sl.value=s.daily[`body_${label}`]||5;
+    sl.addEventListener("input",e=>{val.textContent=`${e.target.value}/10`;setState({daily:{...s.daily,[`body_${label}`]:Number(e.target.value)}});});
+    d.appendChild(sl);
+    wc.querySelector("div").appendChild(d);
+  });
+  wrap.appendChild(wc);
+  return wrap;
+}
+
+function renderGoals(){
+  const s=state;
+  const SMART={it:[{n:"1",t:"Sii specifica",b:"'Eseguire il Gemini entro marzo' — non 'migliorare al pole'."},{n:"2",t:"Rendi misurabile",b:"'3 volte a settimana' — non 'di più'."},{n:"3",t:"Verifica la raggiungibilità",b:"Deve sfidare ma non essere impossibile."},{n:"4",t:"Allineamento con i valori",b:"Il tuo obiettivo deve essere tuo."},{n:"5",t:"Scadenza chiara",b:"Senza data è solo un desiderio."},{n:"6",t:"Scrivi e rivedi",b:"Scrivere aumenta del 42% la probabilità."}],en:[{n:"1",t:"Be specific",b:"'Execute Gemini by March' — not 'get better'."},{n:"2",t:"Make it measurable",b:"'3 times a week' — not 'more'."},{n:"3",t:"Check achievability",b:"Must challenge but not be impossible."},{n:"4",t:"Align with values",b:"The goal must be yours."},{n:"5",t:"Clear deadline",b:"Without a date it's just a wish."},{n:"6",t:"Write and review",b:"Writing increases the probability by 42%."}],fr:[{n:"1",t:"Sois spécifique",b:"Pas 'progresser' mais un objectif précis."},{n:"2",t:"Mesurable",b:"'3 fois/semaine' — pas 'plus'."},{n:"3",t:"Vérifiable",b:"Doit défier sans être impossible."},{n:"4",t:"Aligné à tes valeurs",b:"L'objectif doit être le tien."},{n:"5",t:"Délai clair",b:"Sans date c'est un souhait."},{n:"6",t:"Écris et révise",b:"+42% de probabilité de succès."}],ar:[{n:"1",t:"كوني محددة",b:"هدف محدد، لا 'التحسن'."},{n:"2",t:"قابل للقياس",b:"'3 مرات أسبوعياً'."},{n:"3",t:"قابل للتحقيق",b:"تحدٍّ لكن ليس مستحيلاً."},{n:"4",t:"متوافق مع قيمك",b:"يجب أن يكون هدفك أنت."},{n:"5",t:"موعد نهائي",b:"بدون تاريخ هو أمنية."},{n:"6",t:"اكتبي وراجعي",b:"+42٪ احتمال النجاح."}],de:[{n:"1",t:"Sei spezifisch",b:"Spezifisches Ziel, nicht 'besser werden'."},{n:"2",t:"Messbar",b:"'3x/Woche'."},{n:"3",t:"Erreichbar",b:"Herausfordernd aber möglich."},{n:"4",t:"Wertekonform",b:"Das Ziel muss deins sein."},{n:"5",t:"Klare Frist",b:"Ohne Datum ist es ein Wunsch."},{n:"6",t:"Schreiben",b:"+42% Erfolgswahrscheinlichkeit."}],es:[{n:"1",t:"Sé específica",b:"Objetivo específico, no 'mejorar'."},{n:"2",t:"Medible",b:"'3 veces/semana'."},{n:"3",t:"Alcanzable",b:"Desafiante pero posible."},{n:"4",t:"Alineado",b:"El objetivo debe ser tuyo."},{n:"5",t:"Fecha límite",b:"Sin fecha es un deseo."},{n:"6",t:"Escribe",b:"+42% de probabilidad."}],pt:[{n:"1",t:"Seja específica",b:"Objetivo específico, não 'melhorar'."},{n:"2",t:"Mensurável",b:"'3 vezes/semana'."},{n:"3",t:"Alcançável",b:"Desafiador mas possível."},{n:"4",t:"Alinhado",b:"O objetivo deve ser seu."},{n:"5",t:"Prazo claro",b:"Sem data é um desejo."},{n:"6",t:"Escreva",b:"+42% de probabilidade."}],nl:[{n:"1",t:"Wees specifiek",b:"Specifiek doel, niet 'beter worden'."},{n:"2",t:"Meetbaar",b:"'3x/week'."},{n:"3",t:"Haalbaar",b:"Uitdagend maar mogelijk."},{n:"4",t:"Waardengericht",b:"Het doel moet van jou zijn."},{n:"5",t:"Duidelijke deadline",b:"Zonder datum is het een wens."},{n:"6",t:"Schrijf het op",b:"+42% kans op succes."}]};
+  const sm=SMART[s.lang]||SMART.en;
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("goalsTitle")));
+
+  const smartCard=card(h("div",{},[h("p",{style:{fontWeight:"800",fontSize:"13px",color:"#7c3aed",marginTop:"0"}},tx("smartTitle")),
+    ...sm.map(g=>h("div",{style:{display:"flex",gap:"8px",marginBottom:"7px",alignItems:"flex-start"}},[
+      h("div",{style:{width:"22px",height:"22px",borderRadius:"99px",background:grad,color:WHITE,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"11px",fontWeight:"800",flexShrink:"0"}},g.n),
+      h("div",{},[h("p",{style:{margin:"0",fontWeight:"700",fontSize:"12px",color:"#7c3aed"}},g.t),h("p",{style:{margin:"2px 0 0",fontSize:"12px",color:"#374151",lineHeight:"1.5"}},g.b)]),
+    ])),
+  ]),{background:gradS("#fce7f3","#ede9fe"),border:"none"});
+  wrap.appendChild(smartCard);
+
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("goalWord")),makeInput(s.goals.word,v=>setState({goals:{...s.goals,word:v}}))])));
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("annualGoal")),makeTextarea(s.goals.annual,v=>setState({goals:{...s.goals,annual:v}}),4,{minHeight:"90px"})])));
+  [["q1","Q1"],["q2","Q2"],["q3","Q3"],["q4","Q4"]].forEach(([k,label])=>{
+    wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"13px",color:VIOLET,marginTop:"0"}},label),makeTextarea(s.goals[k],v=>setState({goals:{...s.goals,[k]:v}}))])));
+  });
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("dreamLife")),makeTextarea(s.goals.dream,v=>setState({goals:{...s.goals,dream:v}}),5,{minHeight:"120px"})])));
+  return wrap;
+}
+
+function renderGoalQ(){
+  const s=state;
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("goalQTitle")));
+  const pills=h("div",{style:{display:"flex",gap:"4px",flexWrap:"wrap",marginBottom:"1rem"}});
+  ["daily","weekly","monthly","annual"].forEach((k,i)=>pills.appendChild(pill(QTABS()[i],s.gTab===k,()=>setState({gTab:k}))));
+  wrap.appendChild(pills);
+  const qs=(GQ()[s.gTab])||[];
+  qs.forEach((q,i)=>{
+    wrap.appendChild(card(h("div",{},[
+      h("p",{style:{fontWeight:"700",fontSize:"13px",color:VIOLET,marginTop:"0"}},`❓ ${q}`),
+      makeTextarea(s.goalQ[`${s.gTab}_${i}`]||"",v=>setGoalQItem(`${s.gTab}_${i}`,v),3,{minHeight:"70px"}),
+    ])));
+  });
+  return wrap;
+}
+
+function renderMindset(){
+  const s=state;
+  const tips=MT();
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("mindsetTitle")));
+  const quoteC=h("div",{style:{background:grad,borderRadius:"14px",padding:"1rem",marginBottom:"1rem",textAlign:"center"}});
+  const mindsetQ={it:"La forza fisica si allena in palestra. La forza mentale si allena ogni giorno.",en:"Physical strength is trained in the gym. Mental strength is trained every day.",fr:"La force physique s'entraîne en salle. La force mentale s'entraîne chaque jour.",ar:"القوة الجسدية تتدرب في الصالة. القوة العقلية تتدرب كل يوم.",de:"Körperkraft trainiert man im Fitnessstudio. Mentale Stärke jeden Tag.",es:"La fuerza física en el gimnasio. La mental cada día.",pt:"A força física na academia. A mental todos os dias.",nl:"Fysieke kracht in de sportschool. Mentale kracht elke dag."};
+  quoteC.appendChild(h("p",{style:{margin:"0",fontSize:"14px",color:WHITE,fontStyle:"italic",fontWeight:"600"}},`"${mindsetQ[s.lang]||mindsetQ.en}"`));
+  wrap.appendChild(quoteC);
+
+  const tabRow=h("div",{style:{display:"flex",gap:"4px",flexWrap:"wrap",marginBottom:"1rem"}});
+  tips.forEach((tip,i)=>tabRow.appendChild(pill(tip.i,s.mindTab===i,()=>setState({mindTab:i}))));
+  wrap.appendChild(tabRow);
+
+  wrap.appendChild(card(h("div",{},[
+    h("p",{style:{fontWeight:"800",fontSize:"15px",color:"#be185d",marginTop:"0"}},`${tips[s.mindTab].i} ${tips[s.mindTab].t}`),
+    h("p",{style:{fontSize:"14px",color:"#374151",lineHeight:"1.8",margin:"0"}},tips[s.mindTab].b),
+  ])));
+
+  const listCard=card(h("div",{},[
+    ...tips.map((tip,i)=>{
+      const row=h("div",{style:{padding:"9px 10px",borderRadius:"10px",background:s.mindTab===i?"#fdf4ff":"transparent",border:`1.5px solid ${s.mindTab===i?PINK+"55":"transparent"}`,cursor:"pointer",marginBottom:"5px"}});
+      row.appendChild(h("p",{style:{margin:"0",fontWeight:"700",fontSize:"12px",color:VIOLET}},`${tip.i} ${tip.t}`));
+      row.appendChild(h("p",{style:{margin:"3px 0 0",fontSize:"11px",color:GRAY}},tip.b.slice(0,70)+"..."));
+      row.addEventListener("click",()=>setState({mindTab:i}));
+      return row;
+    }),
+  ]));
+  wrap.appendChild(listCard);
+
+  wrap.appendChild(card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("affirmations")),
+    makeTextarea(s.daily["affirmations"]||"",v=>setState({daily:{...s.daily,affirmations:v}}),5,{minHeight:"120px"}),
+  ])));
+
+  const PRE_L={it:["Respira: 4 sec inspira, 2 trattieni, 6 espira — ripeti 3 volte","Visualizza il trick o l'obiettivo della sessione","Afferma: ripeti 3 volte la tua affermazione","Intenziona: 'oggi mi alleno per crescere, non per essere perfetta'","Inizia: prendi il palo con fiducia"],en:["Breathe: 4 sec inhale, 2 hold, 6 exhale — repeat 3 times","Visualize the trick or session goal","Affirm: repeat your affirmation 3 times","Set intention: 'today I train to grow, not to be perfect'","Begin with confidence"],fr:["Respire: 4 sec inspirer, 2 retenir, 6 expirer","Visualise la figure ou l'objectif","Répète ton affirmation 3 fois","Intention: grandir pas être parfaite","Commence avec confiance"],ar:["تنفس: 4 شهيق، 2 احتباس، 6 زفير","تصور الحركة أو الهدف","كرري تأكيدك 3 مرات","نية: أتدرب لأنمو","ابدئي بثقة"],de:["Atme: 4 Sek ein, 2 halten, 6 aus","Visualisiere den Trick","Wiederhole Affirmation 3 mal","Absicht: wachsen nicht perfekt sein","Beginne mit Vertrauen"],es:["Respira: 4 inhalar, 2 retener, 6 exhalar","Visualiza el truco","Repite tu afirmación 3 veces","Intención: crecer no ser perfecta","Comienza con confianza"],pt:["Respire: 4 inalar, 2 segurar, 6 exalar","Visualize o truque","Repita sua afirmação 3 vezes","Intenção: crescer não ser perfeita","Comece com confiança"],nl:["Adem: 4 in, 2 vasthouden, 6 uit","Visualiseer de trick","Herhaal je affirmatie 3 keer","Intentie: groeien niet perfect zijn","Begin met vertrouwen"]};
+  const steps=PRE_L[s.lang]||PRE_L.en;
+  wrap.appendChild(card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:VIOLET,marginTop:"0"}},tx("preRoutine")),
+    h("ol",{style:{paddingLeft:"18px",fontSize:"13px",color:"#374151",lineHeight:"1.9",margin:"0"}},steps.map(step=>h("li",{},step))),
+  ])));
+  return wrap;
+}
+
+function renderTips(){
+  const s=state;
+  const tips=PT();
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("tipsTitle")));
+  const tabRow=h("div",{style:{display:"flex",gap:"4px",flexWrap:"wrap",marginBottom:"1rem"}});
+  tips.forEach((tip,i)=>tabRow.appendChild(pill(tip.t.split(" ").slice(0,2).join(" "),s.tipIdx===i,()=>setState({tipIdx:i}))));
+  wrap.appendChild(tabRow);
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"800",fontSize:"15px",color:"#be185d",marginTop:"0"}},tips[s.tipIdx].t),h("p",{style:{fontSize:"14px",color:"#374151",lineHeight:"1.8",margin:"0"}},tips[s.tipIdx].b)])));
+  const allCard=card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"14px",color:VIOLET,marginTop:"0"}},tx("allTips")),
+    ...tips.map((tip,i)=>{
+      const row=h("div",{style:{padding:"9px 10px",borderRadius:"10px",background:s.tipIdx===i?"#fdf4ff":"transparent",border:`1.5px solid ${s.tipIdx===i?PINK+"55":"transparent"}`,cursor:"pointer",marginBottom:"5px"}});
+      row.appendChild(h("p",{style:{margin:"0",fontWeight:"700",fontSize:"12px",color:VIOLET}},tip.t));
+      row.appendChild(h("p",{style:{margin:"3px 0 0",fontSize:"11px",color:GRAY}},tip.b.slice(0,70)+"..."));
+      row.addEventListener("click",()=>setState({tipIdx:i}));
+      return row;
+    }),
+  ]));
+  wrap.appendChild(allCard);
+  return wrap;
+}
+
+function renderJournal(){
+  const s=state;
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("journalTitle")));
+  const jquote={it:"Scrivi liberamente, senza giudicarti.",en:"Write freely, without judging yourself.",fr:"Écris librement, sans te juger.",ar:"اكتبي بحرية دون إصدار أحكام.",de:"Schreibe frei, ohne dich zu beurteilen.",es:"Escribe libremente, sin juzgarte.",pt:"Escreva livremente, sem se julgar.",nl:"Schrijf vrij, zonder jezelf te beoordelen."};
+  const qc=h("div",{style:{background:gradS("#fce7f3","#ede9fe"),borderRadius:"14px",padding:"1rem",marginBottom:"1rem"}});
+  qc.appendChild(h("p",{style:{margin:"0",fontSize:"14px",color:"#7c3aed",fontStyle:"italic"}},`"${jquote[s.lang]||jquote.en}"`));
+  wrap.appendChild(qc);
+  wrap.appendChild(card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"14px",color:"#be185d",marginTop:"0"}},tx("myPages")),makeTextarea(s.journal,v=>setState({journal:v}),12,{minHeight:"280px"})])));
+  const pCard=card(h("div",{},[h("p",{style:{fontWeight:"700",fontSize:"13px",color:VIOLET,marginTop:"0"}},tx("journalPrompts")),
+    ...JP().map(p=>{
+      const row=h("div",{style:{padding:"8px 10px",borderRadius:"10px",background:"#fdf4ff",border:`1px solid ${PINK}33`,fontSize:"13px",color:"#374151",cursor:"pointer",marginBottom:"5px"}},p);
+      row.addEventListener("click",()=>setState({journal:(s.journal?s.journal+"\n\n":"")+p+"\n"}));
+      return row;
+    }),
+  ]));
+  wrap.appendChild(pCard);
+  return wrap;
+}
+
+function renderStickers(){
+  const s=state;
+  const mquotes=MQ();
+  const wrap=h("div",{style:{padding:"1.5rem 1rem"}});
+  wrap.appendChild(sectionTitle(tx("stickerTitle")));
+
+  const qcard=card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"13px",color:"#7c3aed",marginTop:"0"}},tx("motivational")),
+    ...mquotes.map(q=>h("div",{style:{padding:"9px 12px",borderRadius:"10px",background:"rgba(255,255,255,0.6)",border:`1px solid ${PINK}33`,marginBottom:"7px"}},h("p",{style:{margin:"0",fontSize:"13px",color:"#7c3aed",fontStyle:"italic",lineHeight:"1.6"}},`"${q}"`))),
+  ]),{background:gradS("#fce7f3","#ede9fe"),border:"none"});
+  wrap.appendChild(qcard);
+
+  const chooseCard=card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"13px",color:"#be185d",marginTop:"0"}},tx("chooseSticker")),
+    (()=>{
+      const g=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:"7px",marginBottom:"10px"}});
+      STICKERS.forEach(s=>{
+        const btn=h("button",{style:{fontSize:"22px",background:"#fdf4ff",border:`1.5px solid ${PINK}33`,borderRadius:"10px",padding:"7px 3px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:"2px"}});
+        btn.appendChild(document.createTextNode(s.e));
+        btn.appendChild(h("span",{style:{fontSize:"8px",color:GRAY}},s.l));
+        btn.addEventListener("click",()=>addSticker(s.e));
+        g.appendChild(btn);
+      });
+      return g;
+    })(),
+  ]));
+  wrap.appendChild(chooseCard);
+
+  const wallCard=card(h("div",{},[
+    h("p",{style:{fontWeight:"700",fontSize:"13px",color:VIOLET,marginTop:"0"}},`${tx("myWall")} (${s.stickWall.length} ${tx("achievements")}!)`),
+    s.stickWall.length===0
+      ? h("div",{style:{textAlign:"center",padding:"2rem",color:GRAY,fontSize:"13px"}},[h("p",{style:{fontSize:"36px",margin:"0 0 8px"}},"🌸"),tx("firstSticker")])
+      : (()=>{
+          const board=h("div",{style:{position:"relative",minHeight:"200px",background:"#fdf4ff",borderRadius:"10px",border:`1.5px solid ${PINK}33`,overflow:"hidden"}});
+          s.stickWall.forEach(st=>{
+            const el=h("div",{style:{position:"absolute",left:`${st.x}%`,top:`${st.y}%`,fontSize:"30px",cursor:"pointer",userSelect:"none",transform:"translate(-50%,-50%)"}},st.e);
+            el.title=tx("clickRemove");
+            el.addEventListener("click",()=>removeSticker(st.id));
+            board.appendChild(el);
+          });
+          return board;
+        })(),
+    s.stickWall.length>0?h("p",{style:{fontSize:"11px",color:GRAY,textAlign:"center",marginBottom:"0"}},tx("clickRemove")):null,
+  ]));
+  wrap.appendChild(wallCard);
+  return wrap;
+}
+
+// ── MAIN RENDER ───────────────────────────────────────────────────────
+function render(){
+  saveAll();
+  const s=state;
+  const app=document.getElementById("app");
+  app.innerHTML="";
+  app.dir=s.lang==="ar"?"rtl":"ltr";
+
+  // HEADER
+  const header=h("div",{style:{background:gradS("#fce7f3","#ede9fe"),padding:"1rem",borderBottom:`2px solid ${PINK}22`,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:"0",zIndex:"200"}});
+  header.appendChild(h("div",{},[
+    h("h1",{style:{margin:"0",fontSize:"18px",fontWeight:"800",background:grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"🌸 Pole Life Planner 2026"),
+    h("p",{style:{margin:"2px 0 0",fontSize:"11px",color:GRAY}},TX.appSub[s.lang]||TX.appSub.en),
+  ]));
+  const headerRight=h("div",{style:{display:"flex",gap:"8px",alignItems:"center",position:"relative"}});
+
+  // Language picker
+  const lpWrap=h("div",{style:{position:"relative"}});
+  const lpBtn=h("button",{style:{background:WHITE,border:`1.5px solid ${PINK}44`,borderRadius:"10px",padding:"6px 10px",cursor:"pointer",fontSize:"16px",display:"flex",alignItems:"center",gap:"4px"}});
+  lpBtn.appendChild(document.createTextNode(LANGS[s.lang].flag+" "));
+  lpBtn.appendChild(h("span",{style:{fontSize:"11px",color:GRAY}},LANGS[s.lang].name));
+  lpBtn.addEventListener("click",()=>setState({showLP:!s.showLP}));
+  lpWrap.appendChild(lpBtn);
+  if(s.showLP){
+    const dd=h("div",{style:{position:"absolute",top:"44px",right:"0",background:WHITE,border:`1.5px solid ${PINK}44`,borderRadius:"12px",padding:"8px",zIndex:"300",minWidth:"160px",boxShadow:"0 4px 20px rgba(0,0,0,0.1)"}});
+    Object.entries(LANGS).forEach(([code,l])=>{
+      const btn=h("button",{style:{display:"flex",alignItems:"center",gap:"8px",width:"100%",padding:"8px 10px",borderRadius:"8px",border:"none",background:s.lang===code?grad:"transparent",color:s.lang===code?WHITE:"#374151",cursor:"pointer",fontSize:"13px",fontWeight:s.lang===code?"700":"400"}});
+      btn.appendChild(h("span",{style:{fontSize:"18px"}},l.flag));
+      btn.appendChild(document.createTextNode(l.name));
+      btn.addEventListener("click",()=>setState({lang:code,showLP:false}));
+      dd.appendChild(btn);
+    });
+    lpWrap.appendChild(dd);
+  }
+  headerRight.appendChild(lpWrap);
+
+  const menuBtn=h("button",{style:{background:grad,border:"none",borderRadius:"10px",padding:"8px 14px",color:WHITE,fontWeight:"700",cursor:"pointer",fontSize:"18px"}},"☰");
+  menuBtn.addEventListener("click",()=>setState({sideOpen:!s.sideOpen}));
+  headerRight.appendChild(menuBtn);
+  header.appendChild(headerRight);
+  app.appendChild(header);
+
+  // LAYOUT
+  const layout=h("div",{style:{display:"flex"}});
+
+  // SIDEBAR
+  if(s.sideOpen){
+    const SLS=SL();
+    const sidebar=h("div",{style:{width:"200px",background:WHITE,borderRight:`1.5px solid ${PINK}33`,padding:"1rem 0.5rem",position:"fixed",top:"68px",bottom:"60px",overflowY:"auto",zIndex:"150"}});
+    const SECS=[{id:"home",icon:"🌸"},{id:"annual",icon:"📅"},{id:"monthly",icon:"🗓"},{id:"daily",icon:"☀️"},{id:"pole",icon:"💫"},{id:"fitness",icon:"🧘"},{id:"nutrition",icon:"🥗"},{id:"body",icon:"💪"},{id:"goals",icon:"🎯"},{id:"goalquestions",icon:"❓"},{id:"mindset",icon:"🧠"},{id:"tips",icon:"✨"},{id:"journal",icon:"📝"},{id:"stickers",icon:"🌟"}];
+    SECS.forEach(sec=>{
+      const btn=h("button",{style:{display:"flex",alignItems:"center",gap:"8px",width:"100%",textAlign:"left",padding:"9px 10px",borderRadius:"10px",border:"none",cursor:"pointer",fontSize:"12px",background:s.section===sec.id?grad:"transparent",color:s.section===sec.id?WHITE:"#374151",fontWeight:s.section===sec.id?"700":"400",marginBottom:"2px"}});
+      btn.appendChild(h("span",{style:{fontSize:"14px"}},sec.icon));
+      btn.appendChild(document.createTextNode(SLS[sec.id]));
+      btn.addEventListener("click",()=>setState({section:sec.id,sideOpen:false}));
+      sidebar.appendChild(btn);
+    });
+    layout.appendChild(sidebar);
+  }
+
+  // CONTENT
+  const content=h("div",{style:{flex:"1",paddingBottom:"80px"}});
+  const secMap={home:renderHome,annual:renderCalendar,monthly:renderMonthly,daily:renderDaily,pole:renderPole,fitness:renderFitness,nutrition:renderNutrition,body:renderBody,goals:renderGoals,goalquestions:renderGoalQ,mindset:renderMindset,tips:renderTips,journal:renderJournal,stickers:renderStickers};
+  const renderFn=secMap[s.section]||renderHome;
+  content.appendChild(renderFn());
+  layout.appendChild(content);
+  app.appendChild(layout);
+
+  // BOTTOM NAV
+  const nav=h("div",{style:{position:"fixed",bottom:"0",left:"0",right:"0",background:WHITE,borderTop:`1.5px solid ${PINK}44`,display:"flex",justifyContent:"space-around",padding:"6px 0 10px",zIndex:"100"}});
+  [{id:"home",icon:"🌸"},{id:"monthly",icon:"🗓"},{id:"daily",icon:"☀️"},{id:"pole",icon:"💫"},{id:"goals",icon:"🎯"}].forEach(b=>{
+    const btn=h("button",{style:{background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:"2px",padding:"4px 8px"}});
+    btn.appendChild(h("span",{style:{fontSize:"22px",opacity:s.section===b.id?"1":"0.4"}},b.icon));
+    if(s.section===b.id) btn.appendChild(h("div",{style:{width:"4px",height:"4px",borderRadius:"99px",background:PINK}}));
+    btn.addEventListener("click",()=>setState({section:b.id}));
+    nav.appendChild(btn);
+  });
+  app.appendChild(nav);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+loadAll();
+render();
+</script>
+</body>
+</html>
